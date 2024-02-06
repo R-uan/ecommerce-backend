@@ -17,11 +17,12 @@ class ProductsFactory extends Factory {
     public function definition(): array {
         return [
             'manufacturers_id' => Manufacturers::factory(),
-            'name'            => $this->faker->name(),
-            'description'     => $this->faker->text(5),
-            'image_url'       => $this->faker->url(),
-            'category'        => $this->faker->name(),
-            'availability'    => $this->faker->boolean(),
+            'name'             => $this->faker->name(),
+            'description'      => $this->faker->text(5),
+            'image_url'        => $this->faker->url(),
+            'category'         => $this->faker->name(),
+            'availability'     => $this->faker->boolean(),
+            'price'            => $this->faker->randomFloat(2),
         ];
     }
 }

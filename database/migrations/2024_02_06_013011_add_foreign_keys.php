@@ -20,7 +20,7 @@ return new class extends Migration {
             $table->foreign('products_id')
                 ->references('id')
                 ->on('products')
-                ->onDelete('no action');
+                ->onDelete('cascade');
         });
     }
 

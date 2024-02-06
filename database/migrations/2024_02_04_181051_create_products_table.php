@@ -16,6 +16,7 @@ return new class extends Migration {
             $table->string('image_url');
             $table->string('category');
             $table->boolean('availability');
+            $table->float('price');
             $table->timestamps();
             $table->unsignedBigInteger('manufacturers_id');
         });
