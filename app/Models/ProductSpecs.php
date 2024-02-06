@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ProductSpecs extends Model {
     use HasFactory;
+    protected $hidden = ['created_at', 'updated_at'];
     public function products(): BelongsTo {
         return $this->belongsTo(Products::class);
     }
