@@ -23,9 +23,10 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::prefix('/products')->group(function () {
     Route::controller(ProductsController::class)->group(function () {
         Route::get('/', 'index');
+        Route::post('/', 'store');
         Route::get('/search', 'search');
         Route::get('/{id}', 'show')->where('id', '[0-9]+');
-        Route::post('/', 'store');
+        Route::patch('/{id}', 'update')->where('id', '[0-9]+');
         Route::delete('/{id}', 'destroy')->where('id', '[0-9]+');
     });
 });
