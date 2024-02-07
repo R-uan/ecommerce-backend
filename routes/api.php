@@ -24,13 +24,24 @@ Route::prefix('/products')->group(function () {
     Route::controller(ProductsController::class)->group(function () {
         Route::get('/', 'index');
         Route::post('/', 'store');
-        Route::get('/search', 'search');
+        # Dynamic
         Route::get('/{id}', 'show')->where('id', '[0-9]+');
         Route::patch('/{id}', 'update')->where('id', '[0-9]+');
         Route::delete('/{id}', 'destroy')->where('id', '[0-9]+');
+        # Special
+        Route::get('/search', 'search');
     });
 });
 
-/* Route::get('/', [ProductsController::class, 'index']);
-Route::get('/{id}', [ProductsController::class, 'show']); */
-Route::get('/manufacturers', [ManufacturersController::class, 'index']);
+Route::prefix('/manufacturers')->group(function () {
+    Route::controller(ManufacturersController::class)->group(function () {
+        Route::get('/', 'index');
+        Route::post('/', 'store');
+        # Dynamic
+        Route::get('/{id}', 'show')->where('id', '[0-9]+');
+        Route::patch('/{id}', 'update')->where('id', '[0-9]+');
+        Route::delete('/{id}', 'destroy')->where('id', '[0-9]+');
+        # Special
+        Route::get('/search', 'search');
+    });
+});
