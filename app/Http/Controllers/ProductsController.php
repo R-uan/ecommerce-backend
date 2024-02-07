@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreProductsRequest;
 use App\Http\Requests\UpdateProductsRequest;
 use App\Models\Products;
-use App\Services\ProductsQuery;
+use App\Services\Filters\ProductsQuery;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -15,26 +15,30 @@ class ProductsController extends Controller {
         return Products::join('manufacturers', 'products.manufacturers_id', '=', 'manufacturers.id')
             ->select('products.*', 'manufacturers.name as manufacturer_name')
             ->orderBy('id')
-            ->get();
+            ->paginate();
     }
+
     # Post One api/products
     public function store(StoreProductsRequest $request) {
         $product = new Products($request->all());
         $saved   = $product->save();
         if ($saved) {
-            return response()->json(['message' => 'Sucessfuly saved new Product'], Response::HTTP_OK);
+            return response()->json(['message' => sprintf('Sucessfuly saved new Product %s.', $request->name)], Response::HTTP_CREATED);
         } else {
-            return response()->json(['message' => 'Failed to save new Product']);
+            return response()->json(['message' => 'Failed to save new Product.'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
     # Get One api/products/{id}
     public function show(string $id) {
         $product = Products::find($id);
-        if (!isset($product)) {
+        if ($product) {
+            return response()->json($product, Response::HTTP_OK);
+        } else {
             return response()->json(['message' => sprintf('Product %s not found', $id)], Response::HTTP_NOT_FOUND);
         }
-        return response()->json($product, Response::HTTP_OK);
     }
+
     # Update One api/products/{id}
     public function update(string $id, UpdateProductsRequest $request) {
         $product = Products::find($id);
@@ -42,17 +46,20 @@ class ProductsController extends Controller {
             $product->update($request->all());
             return response()->json(['message' => sprintf('Product %s has been updated', $id)], Response::HTTP_OK);
         } else {
-            return response()->json(['message' => sprintf('Product %s has been updated', $id)], Response::HTTP_OK);
+            return response()->json(['message' => sprintf('Product %s not found.', $id)], Response::HTTP_NOT_FOUND);
         }
     }
+
     # Delete One api/products/{id}
     public function destroy(string $id) {
         $deleted = Products::destroy($id);
         if ($deleted == 0) {
-            return response()->json(['message' => sprintf('Product %s not found', $id)], Response::HTTP_NOT_FOUND);
+            return response()->json(['message' => sprintf('Product %s not found.', $id)], Response::HTTP_NOT_FOUND);
+        } else {
+            return response()->json(['message' => sprintf('Product %s was sucessfuly deleted.', $id)]);
         }
-        return response()->json(['message' => sprintf('Product %s deleted', $id)]);
     }
+
     # Search by parameter api/products/search?param[operation]=value
     public function search(Request $request) {
         $filter   = new ProductsQuery();
