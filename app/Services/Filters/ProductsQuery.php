@@ -1,5 +1,5 @@
 <?php
-namespace App\Services;
+namespace App\Services\Filters;
 
 class ProductsQuery extends QueryFilter {
     protected $table         = 'products';
