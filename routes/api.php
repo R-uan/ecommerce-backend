@@ -1,7 +1,10 @@
 <?php
 
+use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\ManufacturersController;
 use App\Http\Controllers\ProductsController;
+use App\Http\Middleware\ValidateAdmin;
+use App\Http\Middleware\ValidateUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -20,15 +23,11 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+# Public
 Route::prefix('/products')->group(function () {
     Route::controller(ProductsController::class)->group(function () {
         Route::get('/', 'index');
-        Route::post('/', 'store');
-        # Dynamic
         Route::get('/{id}', 'show')->where('id', '[0-9]+');
-        Route::patch('/{id}', 'update')->where('id', '[0-9]+');
-        Route::delete('/{id}', 'destroy')->where('id', '[0-9]+');
-        # Special
         Route::get('/search', 'search');
     });
 });
@@ -36,12 +35,40 @@ Route::prefix('/products')->group(function () {
 Route::prefix('/manufacturers')->group(function () {
     Route::controller(ManufacturersController::class)->group(function () {
         Route::get('/', 'index');
-        Route::post('/', 'store');
-        # Dynamic
         Route::get('/{id}', 'show')->where('id', '[0-9]+');
-        Route::patch('/{id}', 'update')->where('id', '[0-9]+');
-        Route::delete('/{id}', 'destroy')->where('id', '[0-9]+');
-        # Special
         Route::get('/search', 'search');
+    });
+});
+
+Route::prefix('/auth')->group(function () {
+    Route::controller(AuthenticationController::class)
+        ->group(function () {
+            Route::get('/login', 'login');
+        });
+});
+
+# User
+Route::middleware(ValidateUser::class)->group(function () {});
+
+# Admin
+Route::middleware(ValidateAdmin::class)->group(function () {
+    Route::prefix("/admin")->group(function () {
+        # Products
+        Route::prefix("/products")->group(function () {
+            Route::controller(ProductsController::class)->group(function () {
+                Route::post('/', 'store');
+                Route::patch('/{id}', 'update')->where('id', '[0-9]+');
+                Route::delete('/{id}', 'destroy')->where('id', '[0-9]+');
+            });
+        });
+
+        # Manufacturers
+        Route::prefix("/manufacturers")->group(function () {
+            Route::controller(ManufacturersController::class)->group(function () {
+                Route::post('/', 'store');
+                Route::patch('/{id}', 'update')->where('id', '[0-9]+');
+                Route::delete('/{id}', 'destroy')->where('id', '[0-9]+');
+            });
+        });
     });
 });
