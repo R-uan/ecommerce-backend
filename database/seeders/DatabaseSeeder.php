@@ -7,6 +7,7 @@ namespace Database\Seeders;
 use App\Models\Manufacturers;
 use App\Models\Products;
 use App\Models\ProductSpecs;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder {
@@ -19,5 +20,6 @@ class DatabaseSeeder extends Seeder {
             ->count(10)
             ->has(Products::factory()->count(10)->has(ProductSpecs::factory()->count(1)))
             ->create();
+        User::factory()->count(1)->create();
     }
 }
