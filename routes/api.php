@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\ManufacturersController;
 use App\Http\Controllers\ProductsController;
+use App\Http\Controllers\UserController;
 use App\Http\Middleware\ValidateAdmin;
 use App\Http\Middleware\ValidateUser;
 use Illuminate\Http\Request;
@@ -42,13 +43,19 @@ Route::prefix('/manufacturers')->group(function () {
     });
 });
 
+/**
+ * Authentication Endpoint
+ */
 Route::prefix('/auth')->group(function () {
     Route::controller(AuthenticationController::class)
         ->group(function () {
             Route::get('/login', 'login');
             Route::get('/refresh', 'refresh');
         });
+    Route::post('/register', [UserController::class, 'register']);
 });
+
+Route::get('/teste', [UserController::class, 'index']);
 
 /**
  * Authenticated User Endpoint
