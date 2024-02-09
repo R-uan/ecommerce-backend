@@ -10,24 +10,20 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class ManufacturersController extends Controller {
-    # Get All
+    /**
+     * Get All api/manufacturers
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function index() {
         return Manufacturers::select('manufacturers.*')
             ->orderBy('id')
             ->paginate();
     }
 
-    # Get One
-    public function show(string $id) {
-        $manufacturer = Manufacturers::find($id);
-        if ($manufacturer) {
-            return response()->json($manufacturer, Response::HTTP_OK);
-        } else {
-            return response()->json(['message' => sprintf('Manufacturer %s not found.', $id)], Response::HTTP_NOT_FOUND);
-        }
-    }
-
-    # Post One
+    /**
+     * Post One api/manufacturers
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function store(StoreManufacturersRequest $request) {
         $manufacturer = new Manufacturers($request->all());
         $saved        = $manufacturer->save();
@@ -38,7 +34,23 @@ class ManufacturersController extends Controller {
         }
     }
 
-    # Update One
+    /**
+     * Get One api/manufacturers/{id}
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function show(string $id) {
+        $manufacturer = Manufacturers::find($id);
+        if ($manufacturer) {
+            return response()->json($manufacturer, Response::HTTP_OK);
+        } else {
+            return response()->json(['message' => sprintf('Manufacturer %s not found.', $id)], Response::HTTP_NOT_FOUND);
+        }
+    }
+
+    /**
+     * Update One api/manufacturers/{id}
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function update(UpdateManufacturersRequest $request, string $id) {
         $manufacturer = Manufacturers::find($id);
         if ($manufacturer) {
@@ -49,7 +61,10 @@ class ManufacturersController extends Controller {
         }
     }
 
-    # Delete One
+    /**
+     * Delete One api/manufacturers/{id}
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function destroy(string $id) {
         $deleted = Manufacturers::destroy($id);
         if ($deleted == 0) {
@@ -59,7 +74,10 @@ class ManufacturersController extends Controller {
         }
     }
 
-    # Search Query
+    /**
+     * Search Query api/manufacturers/search?param[operation]=value
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function search(Request $request) {
         $filter        = new ManufacturersQuery();
         $query         = $filter->transform($request);

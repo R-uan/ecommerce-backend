@@ -10,7 +10,10 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class ProductsController extends Controller {
-    # Get All api/products
+    /**
+     * Get All api/products
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function index(Request $request) {
         return Products::join('manufacturers', 'products.manufacturers_id', '=', 'manufacturers.id')
             ->select('products.*', 'manufacturers.name as manufacturer_name')
@@ -18,7 +21,10 @@ class ProductsController extends Controller {
             ->paginate();
     }
 
-    # Post One api/products
+    /**
+     * Post One api/products
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function store(StoreProductsRequest $request) {
         $product = new Products($request->all());
         $saved   = $product->save();
@@ -29,7 +35,10 @@ class ProductsController extends Controller {
         }
     }
 
-    # Get One api/products/{id}
+    /**
+     * Get One api/products/{id}
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function show(string $id) {
         $product = Products::find($id);
         if ($product) {
@@ -39,7 +48,10 @@ class ProductsController extends Controller {
         }
     }
 
-    # Update One api/products/{id}
+    /**
+     * Update One api/products/{id}
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function update(string $id, UpdateProductsRequest $request) {
         $product = Products::find($id);
         if ($product) {
@@ -50,7 +62,10 @@ class ProductsController extends Controller {
         }
     }
 
-    # Delete One api/products/{id}
+    /**
+     * Delete One api/products/{id}
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function destroy(string $id) {
         $deleted = Products::destroy($id);
         if ($deleted == 0) {
@@ -60,7 +75,10 @@ class ProductsController extends Controller {
         }
     }
 
-    # Search by parameter api/products/search?param[operation]=value
+    /**
+     * Search by parameter api/products/search?param[operation]=value
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function search(Request $request) {
         $filter   = new ProductsQuery();
         $query    = $filter->transform($request);
