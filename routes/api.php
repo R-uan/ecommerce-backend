@@ -23,7 +23,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-# Public
+/**
+ * Public Endpoints
+ */
 Route::prefix('/products')->group(function () {
     Route::controller(ProductsController::class)->group(function () {
         Route::get('/', 'index');
@@ -44,13 +46,18 @@ Route::prefix('/auth')->group(function () {
     Route::controller(AuthenticationController::class)
         ->group(function () {
             Route::get('/login', 'login');
+            Route::get('/refresh', 'refresh');
         });
 });
 
-# User
+/**
+ * Authenticated User Endpoint
+ */
 Route::middleware(ValidateUser::class)->group(function () {});
 
-# Admin
+/**
+ * Administrative Endpoints
+ */
 Route::middleware(ValidateAdmin::class)->group(function () {
     Route::prefix("/admin")->group(function () {
         # Products
