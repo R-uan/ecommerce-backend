@@ -16,7 +16,7 @@ class Products extends Model {
         'image_url',
         'category',
         'availability',
-        'price',
+        'unit_price',
         'manufacturers_id',
     ];
     public function manufacturer(): BelongsTo {

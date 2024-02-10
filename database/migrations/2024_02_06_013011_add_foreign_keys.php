@@ -22,6 +22,25 @@ return new class extends Migration {
                 ->on('products')
                 ->onDelete('cascade');
         });
+
+        Schema::table('orders', function (Blueprint $table) {
+            $table->foreign('client_id')
+                ->references('id')
+                ->on('users')
+                ->onDelete('no action');
+        });
+
+        Schema::table('order_itens', function (Blueprint $table) {
+            $table->foreign('product_id')
+                ->references('id')
+                ->on('products')
+                ->onDelete('no action');
+
+            $table->foreign('orders_id')
+                ->references('id')
+                ->on('orders')
+                ->onDelete('no action');
+        });
     }
 
     /**

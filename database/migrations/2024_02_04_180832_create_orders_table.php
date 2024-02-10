@@ -9,16 +9,13 @@ return new class extends Migration {
      * Run the migrations.
      */
     public function up(): void {
-        Schema::create('products', function (Blueprint $table) {
+        Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('description');
-            $table->string('image_url');
-            $table->string('category');
-            $table->boolean('availability');
-            $table->float('unit_price');
+            $table->string('status');
+            $table->dateTime('order_date');
+            $table->float('total')->nullable();
+            $table->unsignedBigInteger('client_id');
             $table->timestamps();
-            $table->unsignedBigInteger('manufacturers_id');
         });
     }
 
@@ -26,6 +23,6 @@ return new class extends Migration {
      * Reverse the migrations.
      */
     public function down(): void {
-        Schema::dropIfExists('products');
+        Schema::dropIfExists('orders');
     }
 };

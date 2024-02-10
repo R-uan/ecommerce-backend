@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\ManufacturersController;
+use App\Http\Controllers\OrdersController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\UserController;
 use App\Http\Middleware\ValidateAdmin;
@@ -55,12 +56,18 @@ Route::prefix('/auth')->group(function () {
     Route::post('/register', [UserController::class, 'register']);
 });
 
-Route::get('/teste', [UserController::class, 'index']);
-
 /**
- * Authenticated User Endpoint
+ * Authenticated Client Endpoint
  */
-Route::middleware(ValidateUser::class)->group(function () {});
+Route::middleware(ValidateUser::class)->group(function () {
+    /**
+     * Orders
+     */
+    Route::controller(OrdersController::class)->group(function () {
+        Route::get('/orders/order', 'create');
+        Route::get('/orders', 'show');
+    });
+});
 
 /**
  * Administrative Endpoints
@@ -82,6 +89,13 @@ Route::middleware(ValidateAdmin::class)->group(function () {
                 Route::post('/', 'store');
                 Route::patch('/{id}', 'update')->where('id', '[0-9]+');
                 Route::delete('/{id}', 'destroy')->where('id', '[0-9]+');
+            });
+        });
+
+        # Orders
+        Route::prefix('/orders')->group(function () {
+            Route::controller(OrdersController::class)->group(function () {
+                Route::get('/orders', 'index');
             });
         });
     });
