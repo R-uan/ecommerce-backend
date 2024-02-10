@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\Store\StoreUserRequest;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class UserController extends Controller {
+    #region Public Functions
+
     /**
      * Client User Registration
      * @return \Illuminate\Http\JsonResponse
@@ -26,6 +28,10 @@ class UserController extends Controller {
         }
     }
 
+    #endregion
+
+    #region Administrative Functions
+
     /**
      * Gets All Users
      * @return \Illuminate\Http\JsonResponse
@@ -33,4 +39,6 @@ class UserController extends Controller {
     public function index() {
         return response()->json(User::all());
     }
+
+    #endregion
 }

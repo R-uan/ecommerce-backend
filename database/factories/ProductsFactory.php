@@ -22,7 +22,7 @@ class ProductsFactory extends Factory {
             'image_url'        => $this->faker->url(),
             'category'         => $this->faker->name(),
             'availability'     => $this->faker->boolean(),
-            'price'            => $this->faker->randomFloat(2),
+            'unit_price'       => $this->faker->randomFloat(2),
         ];
     }
 }

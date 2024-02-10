@@ -1,16 +1,14 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Store;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateProductSpecsRequest extends FormRequest
-{
+class StoreOrdersRequest extends FormRequest {
     /**
      * Determine if the user is authorized to make this request.
      */
-    public function authorize(): bool
-    {
+    public function authorize(): bool {
         return false;
     }
 
@@ -19,10 +17,11 @@ class UpdateProductSpecsRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules(): array
-    {
+    public function rules(): array {
         return [
-            //
+            'products'              => 'required|array',
+            'products.*.amount'     => 'required|numeric',
+            'products.*.product_id' => 'required|exists:products,id',
         ];
     }
 }

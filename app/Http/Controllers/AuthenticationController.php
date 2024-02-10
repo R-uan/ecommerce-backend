@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthenticationController extends Controller {
+    #region Public Function
 
     /**
      * Get a JWT via given credentials.
@@ -23,6 +24,10 @@ class AuthenticationController extends Controller {
             return response()->json(['message' => ['token' => $token]], Response::HTTP_OK);
         }
     }
+
+    #endregion
+
+    #region System Functions
 
     /**
      * Refresh Token if >1 week old
@@ -47,4 +52,6 @@ class AuthenticationController extends Controller {
             }
         }
     }
+
+    #endregion
 }

@@ -1,18 +1,18 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Store;
 
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\Validator;
 
-class StoreManufacturersRequest extends FormRequest {
+class StoreProductSpecsRequest extends FormRequest {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool {
-        return true;
+        return false;
     }
 
     /**
@@ -22,9 +22,7 @@ class StoreManufacturersRequest extends FormRequest {
      */
     public function rules(): array {
         return [
-            'name'    => ['required'],
-            'email'   => ['required', 'email'],
-            'website' => ['url'],
+            //
         ];
     }
 
@@ -33,5 +31,4 @@ class StoreManufacturersRequest extends FormRequest {
             response()->json(['message' => $validator->errors()], JsonResponse::HTTP_UNPROCESSABLE_ENTITY)
         );
     }
-
 }

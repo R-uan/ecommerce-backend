@@ -10,8 +10,7 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class ValidateUser {
     /**
-     * Handle an incoming request.
-     *
+     * Validates User from JWT
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
     public function handle(Request $request, Closure $next): Response {
@@ -19,9 +18,9 @@ class ValidateUser {
             $authHeader = explode(" ", $request->header('Authorization'));
             $validUser  = JWTAuth::parseToken($authHeader[1])->authenticate();
             if ($validUser) {
-                return $validUser->role == "USER" ? $next($request) : response()->json(['message' => 'unauthorized'], Response::HTTP_UNAUTHORIZED);
+                return $next($request);
             } else {
-                return response()->json(['messsage' => 'Invalid Token'], Response::HTTP_UNAUTHORIZED);
+                return response()->json(['message' => 'unauthorized'], Response::HTTP_UNAUTHORIZED);
             }
         } catch (Exception $e) {
             if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenInvalidException) {
