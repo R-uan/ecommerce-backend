@@ -13,40 +13,75 @@ class ManufacturersController extends Controller {
     #region Public Functions
 
     /**
-     * Get All api/manufacturers
+     * Gets all manufacturer records in the database
      * @return \Illuminate\Http\JsonResponse
      */
-    public function index() {
-        return Manufacturers::select('manufacturers.*')
-            ->orderBy('id')
-            ->paginate();
-    }
-
-    /**
-     * Get One api/manufacturers/{id}
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function show(string $id) {
-        $manufacturer = Manufacturers::find($id);
-        if ($manufacturer) {
-            return response()->json($manufacturer, Response::HTTP_OK);
-        } else {
-            return response()->json(['message' => sprintf('Manufacturer %s not found.', $id)], Response::HTTP_NOT_FOUND);
+    public function all() {
+        try {
+            $manufacturers = Manufacturers::select('manufacturers.*')
+                ->orderBy('id')
+                ->paginate();
+            return response()->json([
+                'message' => 'Manufacturers found.',
+                'data'    => $manufacturers,
+            ], Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'Something went wrong.',
+                'error'   => $th->getMessage(),
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
     /**
-     * Search Query api/manufacturers/search?param[operation]=value
+     * Gets one manufacturer record from the database given the id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function one(string $id) {
+        try {
+            $manufacturer = Manufacturers::find($id);
+            if ($manufacturer) {
+                return response()->json([
+                    'message' => 'Manufacturer found',
+                    'data'    => $manufacturer,
+                ], Response::HTTP_OK);
+            } else {
+                return response()->json([
+                    'message' => sprintf('Manufacturer %s not found.', $id),
+                ], Response::HTTP_NOT_FOUND);
+            }
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'Something went wrong.',
+                'error'   => $th->getMessage(),
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Performs a search for orders based on specific criteria provided in the request.
      * @return \Illuminate\Http\JsonResponse
      */
     public function search(Request $request) {
-        $filter        = new ManufacturersQuery();
-        $query         = $filter->transform($request);
-        $manufacturers = Manufacturers::where($query)->paginate();
-        if ($manufacturers) {
-            return response()->json($manufacturers, Response::HTTP_OK);
-        } else {
-            return response()->json(['message' => 'Nothing found'], Response::HTTP_NOT_FOUND);
+        try {
+            $filter        = new ManufacturersQuery();
+            $query         = $filter->transform($request);
+            $manufacturers = Manufacturers::where($query)->paginate();
+            if ($manufacturers) {
+                return response()->json([
+                    'message' => 'Manufacturers Found.',
+                    'data'    => $manufacturers,
+                ], Response::HTTP_OK);
+            } else {
+                return response()->json([
+                    'message' => 'Nothing found',
+                ], Response::HTTP_NOT_FOUND);
+            }
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'Something went wrong.',
+                'error'   => $th->getMessage(),
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -55,44 +90,78 @@ class ManufacturersController extends Controller {
     #region Administrative Functions
 
     /**
-     * Post One api/manufacturers
+     * Create one manufacturer record on the database
      * @return \Illuminate\Http\JsonResponse
      */
-    public function store(StoreManufacturersRequest $request) {
-        $manufacturer = new Manufacturers($request->all());
-        $saved        = $manufacturer->save();
-        if ($saved) {
-            return response()->json(['message' => sprintf('Sucessfuly saved new Manufacturer %s.', $request->name)], Response::HTTP_CREATED);
-        } else {
-            return response()->json(['message' => 'Failed to save manufacturer.'], Response::HTTP_INTERNAL_SERVER_ERROR);
+    public function create(StoreManufacturersRequest $request) {
+        try {
+            $manufacturer = new Manufacturers($request->all());
+            $saved        = $manufacturer->save();
+            if ($saved) {
+                return response()->json([
+                    'message' => sprintf('Sucessfuly saved new Manufacturer %s.', $request->name),
+                ], Response::HTTP_CREATED);
+            } else {
+                return response()->json([
+                    'message' => 'Failed to save manufacturer.',
+                ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'Something went wrong.',
+                'error'   => $th->getMessage(),
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
     /**
-     * Update One api/manufacturers/{id}
+     * Update one manufacturer record on the database given the id and request information
      * @return \Illuminate\Http\JsonResponse
      */
     public function update(UpdateManufacturersRequest $request, string $id) {
-        $manufacturer = Manufacturers::find($id);
-        if ($manufacturer) {
-            $manufacturer->update($request->all());
-            return response()->json(['message' => sprintf('Manufacturer %s has been updated.', $id)], Response::HTTP_OK);
-        } else {
-            return response()->json(['message' => sprintf('Manufacturer %s no found.', $id)], Response::HTTP_NOT_FOUND);
+        try {
+            $manufacturer = Manufacturers::find($id);
+            if ($manufacturer) {
+                $manufacturer->update($request->all());
+                return response()->json([
+                    'message' => sprintf('Manufacturer %s has been updated.', $id),
+                ], Response::HTTP_OK);
+            } else {
+                return response()->json([
+                    'message' => sprintf('Manufacturer %s no found.', $id),
+                ], Response::HTTP_NOT_FOUND);
+            }
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'Something went wrong.',
+                'error'   => $th->getMessage(),
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
     /**
-     * Delete One api/manufacturers/{id}
+     * Deletes one manufacturer record given the id
      * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(string $id) {
-        $deleted = Manufacturers::destroy($id);
-        if ($deleted == 0) {
-            return response()->json(['message' => sprintf('Manufacturer %s was not found.', $id)], Response::HTTP_NOT_FOUND);
-        } else {
-            return response()->json(['message' => sprintf('Manufacturer %s was sucessfuly deleted.', $id)], Response::HTTP_OK);
+        try {
+            $deleted = Manufacturers::destroy($id);
+            if ($deleted == 0) {
+                return response()->json([
+                    'message' => sprintf('Manufacturer %s was not found.', $id),
+                ], Response::HTTP_NOT_FOUND);
+            } else {
+                return response()->json([
+                    'message' => sprintf('Manufacturer %s was sucessfuly deleted.', $id),
+                ], Response::HTTP_OK);
+            }
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'Something went wrong.',
+                'error'   => $th->getMessage(),
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
     #endregion
 }
