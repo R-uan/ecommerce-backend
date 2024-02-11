@@ -2,17 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Update\UpdateOrdersRequest;
 use App\Models\OrderItens;
 use App\Models\Orders;
 use App\Models\Products;
+use App\Services\Filters\OrdersQuery;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 
 class OrdersController extends Controller {
     #region Authenticated Client Function
+
     /**
-     * Makes a new order
+     * Creates a new order record under the authenticated client
      * @return \Illuminate\Http\JsonResponse
      */
     public function create(Request $request) {
@@ -46,14 +49,13 @@ class OrdersController extends Controller {
                     $totalOrderPrice += $orderItensInfo['total_price'];
                 } else {
                     DB::rollBack();
-                    return response()->json(
-                        [
-                            'response'            => 'One of the products is not available',
-                            'unavailable_product' => [
-                                'product_id'   => $order_product['product_id'],
-                                'product_info' => $product ? $product : null,
-                            ],
-                        ], Response::HTTP_BAD_REQUEST);
+                    return response()->json([
+                        'message'             => 'One of the products is not available',
+                        'unavailable_product' => [
+                            'product_id'   => $order_product['product_id'],
+                            'product_info' => $product ? $product : null,
+                        ],
+                    ], Response::HTTP_BAD_REQUEST);
                 }
             }
 
@@ -61,48 +63,160 @@ class OrdersController extends Controller {
             $order->save();
 
             DB::commit();
-            return response()->json(['response' => $order], Response::HTTP_OK);
+            return response()->json(['message' => $order], Response::HTTP_OK);
         } catch (\Throwable $th) {
             DB::rollBack();
-            return response()->json(['message' => 'Ocorreu um erro ao processar o pedido' . $th], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response()->json([
+                'message' => 'Something went wrong.',
+                'error'   => $th->getMessage(),
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
     /**
-     * Get Orders From A Costumer
+     * Get all order records from the authenticated client
      * @return \Illuminate\Http\JsonResponse
      */
-    public function show() {
-        $user  = auth()->user();
-        $id    = $user->id;
-        $query = Orders::where('client_id', $id)->with('orderItens')->get();
-        return response()->json(['response' => $query], Response::HTTP_OK);
+    public function userOrders() {
+        try {
+            $user  = auth()->user();
+            $id    = $user->id;
+            $query = Orders::where('client_id', $id)->with('orderItens')->get();
+            return response()->json([
+                'message' => sprintf('Orders found for user %s', $id),
+                'data'    => $query,
+            ], Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'Something went wrong.',
+                'error'   => $th->getMessage(),
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
+
     #endregion
 
     #region Administrative Functions
+
     /**
-     * Returns All Orders
+     * Retrieves all orders records from the database
      * @return \Illuminate\Http\JsonResponse
      */
     public function all() {
-        return response()->json(Orders::all());
+        try {
+            $orders = Orders::all()->paginate();
+            return response()->json([
+                'message' => 'Orders found.',
+                'data'    => $orders,
+            ], Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'Something went wrong.',
+                'error'   => $th->getMessage(),
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
-     * Find One Order By Id
+     * Retrieves one order record from the database
      * @return \Illuminate\Http\JsonResponse
      */
     public function one(string $id) {
         try {
             $order = Orders::find($id);
             if ($order) {
-                return response()->json(['response' => $order], Response::HTTP_OK);
+                return response()->json([
+                    'message' => 'Order found',
+                    'data'    => $order,
+                ], Response::HTTP_OK);
             } else {
-                return response()->json(['response' => sprintf('Order %s not found!', $id)], Response::HTTP_OK);
+                return response()->json([
+                    'message' => sprintf('Order %s not found!', $id),
+                ], Response::HTTP_OK);
             }
         } catch (\Throwable $th) {
-            return response()->json(['response' => 'Something went wrong.'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return response()->json([
+                'message' => 'Something went wrong.',
+                'error'   => $th->getMessage(),
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Delete one order record given the id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function destroy(string $id) {
+        try {
+            $order  = Orders::find($id);
+            $delete = Orders::destroy($id);
+            if ($delete != 0) {
+                return response()->json([
+                    'message' => sprintf('Order was %s deleted', $id),
+                    'data'    => $order,
+                ], Response::HTTP_OK);
+            } else {
+                return response()->json([
+                    'message' => sprintf('Order %s was not found.', $id),
+                ], Response::HTTP_NOT_FOUND);
+            }
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'Something went wrong.',
+                'error'   => $th->getMessage(),
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Updates one order record based on the id and request information
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function update(string $id, UpdateOrdersRequest $request) {
+        try {
+            $order = Orders::find($id);
+            if ($order) {
+                $order->update($request->all());
+                return response()->json([
+                    'message' => 'Order updated',
+                    'data'    => $order,
+                ], Response::HTTP_OK);
+            } else {
+                return response()->json([
+                    'message' => sprintf('Order %s not found.', $id),
+                ], Response::HTTP_NOT_FOUND);
+            }
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'Something went wrong.',
+                'error'   => $th->getMessage(),
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Performs a query search for orders based on the provided criteria.
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function search(Request $request) {
+        try {
+            $filter = new OrdersQuery();
+            $query  = $filter->transform($request);
+            $orders = Orders::where($query)->paginate();
+            if (count($orders->all()) > 0) {
+                return response()->json([
+                    'message' => 'Orders Found.',
+                    'data'    => $orders,
+                ], Response::HTTP_OK);
+            } else {
+                return response()->json([
+                    'message' => 'Nothing found.',
+                ], Response::HTTP_NO_CONTENT);
+            }
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'Something went wrong.',
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 

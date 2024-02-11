@@ -11,9 +11,9 @@ return new class extends Migration {
     public function up(): void {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
+            $table->float('total')->nullable();
             $table->string('status');
             $table->dateTime('order_date');
-            $table->float('total')->nullable();
             $table->unsignedBigInteger('client_id');
             $table->timestamps();
         });

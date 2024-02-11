@@ -2,7 +2,10 @@
 
 namespace App\Http\Requests\Store;
 
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Http\JsonResponse;
 
 class StoreOrdersRequest extends FormRequest {
     /**
@@ -23,5 +26,13 @@ class StoreOrdersRequest extends FormRequest {
             'products.*.amount'     => 'required|numeric',
             'products.*.product_id' => 'required|exists:products,id',
         ];
+    }
+
+    protected function failedValidation(Validator $validator) {
+        throw new HttpResponseException(
+            response()->json([
+                'message' => $validator->errors(),
+            ], JsonResponse::HTTP_UNPROCESSABLE_ENTITY)
+        );
     }
 }
