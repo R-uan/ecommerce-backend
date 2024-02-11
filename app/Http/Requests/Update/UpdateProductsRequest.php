@@ -2,7 +2,10 @@
 
 namespace App\Http\Requests\Update;
 
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Http\JsonResponse;
 
 class UpdateProductsRequest extends FormRequest {
     /**
@@ -27,5 +30,13 @@ class UpdateProductsRequest extends FormRequest {
             'unit_price'       => [],
             'manufacturers_id' => [],
         ];
+    }
+
+    protected function failedValidation(Validator $validator) {
+        throw new HttpResponseException(
+            response()->json([
+                'message' => $validator->errors(),
+            ], JsonResponse::HTTP_UNPROCESSABLE_ENTITY)
+        );
     }
 }

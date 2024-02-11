@@ -2,10 +2,10 @@
 
 namespace App\Http\Requests\Store;
 
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Http\JsonResponse;
 
 class StoreProductSpecsRequest extends FormRequest {
     /**
@@ -28,7 +28,9 @@ class StoreProductSpecsRequest extends FormRequest {
 
     protected function failedValidation(Validator $validator) {
         throw new HttpResponseException(
-            response()->json(['message' => $validator->errors()], JsonResponse::HTTP_UNPROCESSABLE_ENTITY)
+            response()->json([
+                'message' => $validator->errors(),
+            ], JsonResponse::HTTP_UNPROCESSABLE_ENTITY)
         );
     }
 }

@@ -28,10 +28,12 @@ class StoreUserRequest extends FormRequest {
             'password'   => ['required', 'min:8'],
         ];
     }
+
     protected function failedValidation(Validator $validator) {
         throw new HttpResponseException(
-            response()->json(['message' => $validator->errors()], JsonResponse::HTTP_UNPROCESSABLE_ENTITY)
+            response()->json([
+                'message' => $validator->errors(),
+            ], JsonResponse::HTTP_UNPROCESSABLE_ENTITY)
         );
     }
-
 }
