@@ -18,17 +18,31 @@ class ValidateAdmin {
             $authHeader = explode(" ", $request->header('Authorization'));
             $validUser  = JWTAuth::parseToken($authHeader[1])->authenticate();
             if ($validUser) {
-                return $validUser->role == "ADMIN" ? $next($request) : response()->json(['message' => 'unauthorized'], Response::HTTP_UNAUTHORIZED);
+                if ($validUser->role == "ADMIN") {
+                    return $next($request);
+                } else {
+                    return response()->json([
+                        'message' => 'Unable to authenticate user.',
+                    ], Response::HTTP_UNAUTHORIZED);
+                }
             } else {
-                return response()->json(['messsage' => 'Invalid Token'], Response::HTTP_UNAUTHORIZED);
+                return response()->json([
+                    'messsage' => 'Invalid Token',
+                ], Response::HTTP_UNAUTHORIZED);
             }
         } catch (Exception $e) {
             if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenInvalidException) {
-                return response()->json(['messsage' => 'Invalid Token.'], Response::HTTP_UNAUTHORIZED);
+                return response()->json([
+                    'messsage' => 'Invalid Token.',
+                ], Response::HTTP_UNAUTHORIZED);
             } else if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenExpiredException) {
-                return response()->json(['messsage' => 'Expired Token.'], Response::HTTP_UNAUTHORIZED);
+                return response()->json([
+                    'messsage' => 'Expired Token.',
+                ], Response::HTTP_UNAUTHORIZED);
             } else {
-                return response()->json(['messsage' => 'Authorization Token not found.'], Response::HTTP_UNAUTHORIZED);
+                return response()->json([
+                    'messsage' => 'Authorization Token not found.',
+                ], Response::HTTP_UNAUTHORIZED);
             }
         }
     }
