@@ -5,7 +5,6 @@ use App\Http\Controllers\ManufacturersController;
 use App\Http\Controllers\OrdersController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\UserController;
-use App\Http\Middleware\ValidateAdmin;
 use App\Http\Middleware\ValidateUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -30,16 +29,17 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
  */
 Route::prefix('/products')->group(function () {
     Route::controller(ProductsController::class)->group(function () {
-        Route::get('/', 'index');
-        Route::get('/{id}', 'show')->where('id', '[0-9]+');
+        Route::get('/', 'all');
+        Route::get('/{id}', 'one')->where('id', '[0-9]+');
         Route::get('/search', 'search');
+        Route::get('/miniatures', 'miniatures');
     });
 });
 
 Route::prefix('/manufacturers')->group(function () {
     Route::controller(ManufacturersController::class)->group(function () {
-        Route::get('/', 'index');
-        Route::get('/{id}', 'show')->where('id', '[0-9]+');
+        Route::get('/', 'all');
+        Route::get('/{id}', 'one')->where('id', '[0-9]+');
         Route::get('/search', 'search');
     });
 });
@@ -50,7 +50,7 @@ Route::prefix('/manufacturers')->group(function () {
 Route::prefix('/auth')->group(function () {
     Route::controller(AuthenticationController::class)
         ->group(function () {
-            Route::get('/login', 'login');
+            Route::post('/login', 'login');
             Route::get('/refresh', 'refresh');
         });
     Route::post('/register', [UserController::class, 'register']);
@@ -72,31 +72,32 @@ Route::middleware(ValidateUser::class)->group(function () {
 /**
  * Administrative Endpoints
  */
-Route::middleware(ValidateAdmin::class)->group(function () {
-    Route::prefix("/admin")->group(function () {
-        # Products
-        Route::prefix("/products")->group(function () {
-            Route::controller(ProductsController::class)->group(function () {
-                Route::post('/', 'store');
-                Route::patch('/{id}', 'update')->where('id', '[0-9]+');
-                Route::delete('/{id}', 'destroy')->where('id', '[0-9]+');
-            });
+/* Route::middleware(ValidateAdmin::class)->group(function () { */
+Route::prefix("/admin")->group(function () {
+    # Products
+    Route::prefix("/products")->group(function () {
+        Route::controller(ProductsController::class)->group(function () {
+            Route::post('/', 'store');
+            Route::patch('/{id}', 'update')->where('id', '[0-9]+');
+            Route::delete('/{id}', 'destroy')->where('id', '[0-9]+');
         });
+    });
 
-        # Manufacturers
-        Route::prefix("/manufacturers")->group(function () {
-            Route::controller(ManufacturersController::class)->group(function () {
-                Route::post('/', 'store');
-                Route::patch('/{id}', 'update')->where('id', '[0-9]+');
-                Route::delete('/{id}', 'destroy')->where('id', '[0-9]+');
-            });
+    # Manufacturers
+    Route::prefix("/manufacturers")->group(function () {
+        Route::controller(ManufacturersController::class)->group(function () {
+            Route::post('/', 'store');
+            Route::patch('/{id}', 'update')->where('id', '[0-9]+');
+            Route::delete('/{id}', 'destroy')->where('id', '[0-9]+');
         });
+    });
 
-        # Orders
-        Route::prefix('/orders')->group(function () {
-            Route::controller(OrdersController::class)->group(function () {
-                Route::get('/orders', 'index');
-            });
+    # Orders
+    Route::prefix('/orders')->group(function () {
+        Route::controller(OrdersController::class)->group(function () {
+            Route::get('/orders', 'all');
+            Route::get('/search', 'search');
         });
     });
 });
+/* }); */
