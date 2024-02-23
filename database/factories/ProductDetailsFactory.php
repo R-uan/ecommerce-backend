@@ -6,9 +6,9 @@ use App\Models\Products;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\ProductSpecs>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\ProductDetails>
  */
-class ProductSpecsFactory extends Factory {
+class ProductDetailsFactory extends Factory {
     /**
      * Define the model's default state.
      *
@@ -28,18 +28,3 @@ class ProductSpecsFactory extends Factory {
         ];
     }
 }
-
-/*
-$table->string('propulsion_system');
-$table->string('external_structure');
-$table->string('energy_system');
-$table->string('comunication_system');
-$table->string('navigation_system');
-$table->string('termic_protection');
-$table->string('emergency_system');
-$table->string('landing_system');
-$table->timestamps();
-$table->foreign('product_id')
-->references('id')
-->on('products')
-->onDelete('no action'); */

@@ -9,21 +9,25 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Products extends Model {
     use HasFactory;
-    protected $hidden   = ['created_at', 'updated_at'];
+    protected $hidden = ['created_at', 'updated_at'];
+
     protected $fillable = [
         'name',
-        'description',
-        'image_url',
+        'insurace',
         'category',
-        'availability',
+        'image_url',
         'unit_price',
+        'availability',
         'manufacturers_id',
+        'long_description',
+        'short_description',
     ];
+
     public function manufacturer(): BelongsTo {
         return $this->belongsTo(Manufacturers::class);
     }
 
-    public function productSpecs(): HasOne {
-        return $this->hasOne(ProductSpecs::class);
+    public function productDetails(): HasOne {
+        return $this->hasOne(ProductDetails::class);
     }
 }

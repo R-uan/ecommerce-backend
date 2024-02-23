@@ -16,7 +16,7 @@ return new class extends Migration {
                 ->onDelete('cascade');
         });
 
-        Schema::table('product_specs', function (Blueprint $table) {
+        Schema::table('product_details', function (Blueprint $table) {
             $table->foreign('products_id')
                 ->references('id')
                 ->on('products')

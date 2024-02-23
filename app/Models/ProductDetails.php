@@ -6,10 +6,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class ProductSpecs extends Model {
+class ProductDetails extends Model {
     use HasFactory;
-    protected $hidden = ['created_at', 'updated_at'];
-    public function products(): BelongsTo {
-        return $this->belongsTo(Products::class);
+
+    protected $hidden = ['created_at', 'updated_at', 'products_id', 'id'];
+
+    public function product(): BelongsTo {
+        return $this->BelongsTo(Products::class);
     }
 }

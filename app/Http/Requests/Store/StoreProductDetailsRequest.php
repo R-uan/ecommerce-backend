@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Requests\Update;
+namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 
-class UpdateProductSpecsRequest extends FormRequest {
+class StoreProductDetailsRequest extends FormRequest {
     /**
      * Determine if the user is authorized to make this request.
      */
