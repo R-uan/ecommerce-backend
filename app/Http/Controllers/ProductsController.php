@@ -18,14 +18,37 @@ class ProductsController extends Controller {
      */
     public function all() {
         try {
-            $products = Products::join('manufacturers', 'products.manufacturers_id', '=', 'manufacturers.id')
-                ->select('products.*', 'manufacturers.name as manufacturer_name')
-                ->orderBy('id')
-                ->paginate();
+            $products = Products::with('productDetails')
+                ->join('manufacturers', 'products.manufacturers_id', '=', 'manufacturers.id')
+                ->select('products.*', 'manufacturers.name as manufacturer')
+                ->orderBy('name')
+                ->paginate(16);
+            return response()->json($products, Response::HTTP_OK);
+        } catch (\Throwable $th) {
             return response()->json([
-                'message' => 'Products found.',
-                'data'    => $products,
-            ], Response::HTTP_OK);
+                'message' => 'Something went wrong.',
+                'error'   => $th->getMessage(),
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Returns only the necessary amount of data to make a miniature of the whole product
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function miniatures() {
+        try {
+            $products = Products::join('manufacturers', 'products.manufacturers_id', '=', 'manufacturers.id')
+                ->select([
+                    'products.id',
+                    'products.name',
+                    'products.category',
+                    'products.image_url',
+                    'products.availability',
+                    'products.unit_price',
+                    'manufacturers.name as manufacturer',
+                ])->orderBy('name')->paginate(16);
+            return response()->json($products, Response::HTTP_OK);
         } catch (\Throwable $th) {
             return response()->json([
                 'message' => 'Something went wrong.',
@@ -40,12 +63,14 @@ class ProductsController extends Controller {
      */
     public function one(string $id) {
         try {
-            $product = Products::find($id);
+            $product = Products::with('productDetails')
+                ->where('products.id', $id)
+                ->select('products.*')
+                ->join('manufacturers', 'products.manufacturers_id', '=', 'manufacturers.id')
+                ->select('products.*', 'manufacturers.name as manufacturer')
+                ->get();
             if ($product) {
-                return response()->json([
-                    'message' => sprintf('Product %s found.', $id),
-                    'data'    => $product,
-                ], Response::HTTP_OK);
+                return response()->json($product, Response::HTTP_OK);
             } else {
                 return response()->json([
                     'message' => sprintf('Product %s not found', $id),
@@ -70,11 +95,9 @@ class ProductsController extends Controller {
             $products = Products::where($query)
                 ->join('manufacturers', 'products.manufacturers_id', '=', 'manufacturers.id')
                 ->select('products.*', 'manufacturers.name as manufacturer')
-                ->paginate();
-            return response()->json([
-                'message' => 'Products found.',
-                'data'    => $products,
-            ], Response::HTTP_OK);
+                ->orderBy('name')
+                ->paginate(16)->withQueryString();
+            return response()->json($products, Response::HTTP_OK);
         } catch (\Throwable $th) {
             return response()->json([
                 'message' => 'Something went wrong.',

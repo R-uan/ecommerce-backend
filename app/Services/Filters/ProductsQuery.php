@@ -9,4 +9,7 @@ class ProductsQuery extends QueryFilter {
         'availability' => ['eq'],
         'price'        => ['eq', 'lt', 'gt', 'lte', 'gte'],
     ];
+    protected $columnMap = [
+        'price' => 'unit_price',
+    ];
 }
