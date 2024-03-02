@@ -24,9 +24,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-/**
- * Public Endpoints
- */
+#region Public Endpoints
 Route::prefix('/products')->group(function () {
     Route::controller(ProductsController::class)->group(function () {
         Route::get('/', 'all');
@@ -41,37 +39,34 @@ Route::prefix('/manufacturers')->group(function () {
         Route::get('/', 'all');
         Route::get('/{id}', 'one')->where('id', '[0-9]+');
         Route::get('/search', 'search');
+        Route::get('/{id}/products', 'products');
     });
 });
 
-/**
- * Authentication Endpoint
- */
 Route::prefix('/auth')->group(function () {
     Route::controller(AuthenticationController::class)
         ->group(function () {
             Route::post('/login', 'login');
             Route::get('/refresh', 'refresh');
         });
+
     Route::post('/register', [UserController::class, 'register']);
 });
+#endregion
 
-/**
- * Authenticated Client Endpoint
- */
+#region User Endpoints
+
 Route::middleware(ValidateUser::class)->group(function () {
-    /**
-     * Orders
-     */
     Route::controller(OrdersController::class)->group(function () {
-        Route::get('/orders/order', 'create');
-        Route::get('/orders', 'show');
+        Route::post('/create/order', 'create');
+        Route::get('/orders', 'userOrders');
     });
 });
 
-/**
- * Administrative Endpoints
- */
+#endregion
+
+#region Administrative Endpoints
+
 /* Route::middleware(ValidateAdmin::class)->group(function () { */
 Route::prefix("/admin")->group(function () {
     # Products
@@ -101,3 +96,4 @@ Route::prefix("/admin")->group(function () {
     });
 });
 /* }); */
+#endregion

@@ -84,6 +84,31 @@ class ManufacturersController extends Controller {
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+    /**
+     * Gets first 10 products based on the manufacturer
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function products(string $id) {
+        try {
+            $response = Manufacturers::where('manufacturers.id', $id)
+                ->join('products', 'products.manufacturers_id', '=', 'manufacturers.id')
+                ->select(
+                    'products.id',
+                    'products.name',
+                    'products.category',
+                    'products.image_url',
+                    'products.unit_price',
+                    'products.availability',
+                    'manufacturers.name as manufacturer'
+                )->take(10)->get();
+            return response()->json($response, Response::HTTP_OK);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'Something went wrong.',
+                'error'   => $th->getMessage(),
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
 
     #endregion
 

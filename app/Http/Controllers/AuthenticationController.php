@@ -43,10 +43,7 @@ class AuthenticationController extends Controller {
             $token    = JWTAuth::getToken();
             $newToken = JWTAuth::refresh($token);
             if ($newToken) {
-                return response()->json([
-                    'message' => 'Token refreshed.',
-                    'token'   => $newToken,
-                ], Response::HTTP_OK);
+                return response()->json($newToken, Response::HTTP_OK);
             } else {
                 return response()->json([
                     'messsage' => 'Unable to refresh token.',

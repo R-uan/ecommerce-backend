@@ -22,13 +22,26 @@ class StoreProductsRequest extends FormRequest {
      */
     public function rules(): array {
         return [
-            'name'             => ['required'],
-            'description'      => ['required'],
-            'image_url'        => ['url'],
-            'category'         => ['required', 'string'],
-            'availability'     => ['required'],
-            'unit_price'       => ['required'],
-            'manufacturers_id' => ['required', 'numeric'],
+            'name'              => ['required'],
+            'description'       => ['required'],
+            'image_url'         => ['url'],
+            'category'          => ['required', 'string'],
+            'availability'      => ['required'],
+            'unit_price'        => ['required'],
+            'manufacturers_id'  => ['required', 'numeric'],
+            'short_description' => ['required'],
+            'long_description'  => ['required'],
+
+            'product_details'   => [
+                'energy_system'       => ['required'],
+                'landing_system'      => ['required'],
+                'emergency_system'    => ['required'],
+                'propulsion_system'   => ['required'],
+                'navigation_system'   => ['required'],
+                'external_structure'  => ['required'],
+                'termic_protection'   => ['required'],
+                'comunication_system' => ['required'],
+            ],
         ];
     }
 

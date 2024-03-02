@@ -18,8 +18,8 @@ class ProductsFactory extends Factory {
         return [
             'manufacturers_id'  => Manufacturers::factory(),
             'name'              => $this->faker->name(),
-            'short_description' => $this->faker->text(20),
-            'long_description'  => $this->faker->text(40),
+            'short_description' => $this->faker->text(100),
+            'long_description'  => $this->faker->text(300),
             'insurance'         => $this->faker->text(5),
             'image_url'         => $this->faker->url(),
             'category'          => $this->faker->name(),

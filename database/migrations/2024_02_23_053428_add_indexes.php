@@ -9,8 +9,8 @@ return new class extends Migration {
      * Run the migrations.
      */
     public function up(): void {
-        Schema::create('products', function (Blueprint $table) {
-            $table->index('name', 'products_name_idx');
+        Schema::table('products', function (Blueprint $table) {
+            /* $table->index('name', 'products_name_idx'); */
         });
     }
 

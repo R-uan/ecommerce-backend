@@ -82,10 +82,7 @@ class OrdersController extends Controller {
             $user  = auth()->user();
             $id    = $user->id;
             $query = Orders::where('client_id', $id)->with('orderItens')->get();
-            return response()->json([
-                'message' => sprintf('Orders found for user %s', $id),
-                'data'    => $query,
-            ], Response::HTTP_OK);
+            return response()->json($query, Response::HTTP_OK);
         } catch (\Throwable $th) {
             return response()->json([
                 'message' => 'Something went wrong.',

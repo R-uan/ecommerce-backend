@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Store\StoreProductsRequest;
 use App\Http\Requests\Update\UpdateProductsRequest;
+use App\Models\ProductDetails;
 use App\Models\Products;
 use App\Services\Filters\ProductsQuery;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 
 class ProductsController extends Controller {
     #region Public Functions
@@ -68,7 +70,7 @@ class ProductsController extends Controller {
                 ->select('products.*')
                 ->join('manufacturers', 'products.manufacturers_id', '=', 'manufacturers.id')
                 ->select('products.*', 'manufacturers.name as manufacturer')
-                ->get();
+                ->first();
             if ($product) {
                 return response()->json($product, Response::HTTP_OK);
             } else {
@@ -116,18 +118,36 @@ class ProductsController extends Controller {
      */
     public function store(StoreProductsRequest $request) {
         try {
-            $product = new Products($request->all());
-            $saved   = $product->save();
-            if ($saved) {
-                return response()->json([
-                    'message' => sprintf('Sucessfuly saved new Product %s.', $request->name),
-                ], Response::HTTP_CREATED);
+            DB::beginTransaction();
+            $product = [
+                'name'              => $request->name,
+                'description'       => $request->description,
+                'image_url'         => $request->image_url,
+                'category'          => $request->category,
+                'availability'      => $request->availability,
+                'unit_price'        => $request->unit_price,
+                'manufacturers_id'  => $request->manufacturers_id,
+                'short_description' => $request->short_description,
+                'long_description'  => $request->long_description,
+            ];
+
+            $createdProduct = new Products($product);
+            $createdProduct->save();
+
+            if ($createdProduct) {
+                $productDetailsData          = $request->product_details;
+                $productDetails              = new ProductDetails($productDetailsData);
+                $productDetails->products_id = $createdProduct->id;
+                $productDetails->save();
+                DB::commit();
+                return response()->json([$createdProduct, $productDetails], Response::HTTP_CREATED);
             } else {
-                return response()->json([
-                    'message' => 'Failed to save new Product.',
-                ], Response::HTTP_INTERNAL_SERVER_ERROR);
+                DB::rollBack();
+                return response()->json('Unable to create new product', Response::HTTP_I_AM_A_TEAPOT);
             }
+
         } catch (\Throwable $th) {
+            DB::rollBack();
             return response()->json([
                 'message' => 'Something went wrong.',
                 'error'   => $th->getMessage(),
@@ -135,6 +155,24 @@ class ProductsController extends Controller {
         }
     }
 
+    /* 'name'             => ['required'],
+    'description'      => ['required'],
+    'image_url'        => ['url'],
+    'category'         => ['required', 'string'],
+    'availability'     => ['required'],
+    'unit_price'       => ['required'],
+    'manufacturers_id' => ['required', 'numeric'],
+
+    'product_details'  => [
+    'energy_system'       => ['required'],
+    'landing_system'      => ['required'],
+    'emergency_system'    => ['required'],
+    'propulsion_system'   => ['required'],
+    'navigation_system'   => ['required'],
+    'external_structure'  => ['required'],
+    'termic_protection'   => ['required'],
+    'comunication_system' => ['required'],
+    ], */
     /**
      * Update one product record given the id
      * @return \Illuminate\Http\JsonResponse

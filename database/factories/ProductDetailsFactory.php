@@ -17,14 +17,14 @@ class ProductDetailsFactory extends Factory {
     public function definition(): array {
         return [
             'products_id'         => Products::factory(),
-            'propulsion_system'   => $this->faker->word,
-            'external_structure'  => $this->faker->word,
-            'energy_system'       => $this->faker->word,
-            'comunication_system' => $this->faker->word,
-            'navigation_system'   => $this->faker->word,
-            'termic_protection'   => $this->faker->word,
-            'emergency_system'    => $this->faker->word,
-            'landing_system'      => $this->faker->word,
+            'propulsion_system'   => $this->faker->text(10),
+            'external_structure'  => $this->faker->text(10),
+            'energy_system'       => $this->faker->text(10),
+            'comunication_system' => $this->faker->text(10),
+            'navigation_system'   => $this->faker->text(10),
+            'termic_protection'   => $this->faker->text(10),
+            'emergency_system'    => $this->faker->text(10),
+            'landing_system'      => $this->faker->text(10),
         ];
     }
 }

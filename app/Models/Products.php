@@ -13,7 +13,6 @@ class Products extends Model {
 
     protected $fillable = [
         'name',
-        'insurace',
         'category',
         'image_url',
         'unit_price',

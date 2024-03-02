@@ -14,8 +14,7 @@ return new class extends Migration {
             $table->string('name');
             $table->string('category');
             $table->float('unit_price');
-            $table->string('image_url');
-            $table->string('insurance');
+            $table->string('image_url')->nullable();
             $table->boolean('availability');
             $table->text('long_description')->nullable();
             $table->text('short_description')->nullable();
