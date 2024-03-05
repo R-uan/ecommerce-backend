@@ -20,7 +20,8 @@ class ProductDetails extends Model {
         'termic_protection',
         'comunication_system',
     ];
-    public function product(): BelongsTo {
+
+    public function Product(): BelongsTo {
         return $this->BelongsTo(Products::class);
     }
 }
