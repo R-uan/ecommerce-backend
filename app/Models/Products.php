@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Products extends Model {
@@ -22,11 +23,15 @@ class Products extends Model {
         'short_description',
     ];
 
-    public function manufacturer(): BelongsTo {
-        return $this->belongsTo(Manufacturers::class);
+    public function Manufacturer(): BelongsTo {
+        return $this->belongsTo(Manufacturers::class, 'manufacturers_id');
     }
 
-    public function productDetails(): HasOne {
+    public function ProductDetails(): HasOne {
         return $this->hasOne(ProductDetails::class);
+    }
+
+    public function OrderItens(): HasMany {
+        return $this->hasMany(OrderItens::class, 'product_id');
     }
 }

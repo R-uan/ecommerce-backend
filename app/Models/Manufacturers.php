@@ -12,8 +12,8 @@ class Manufacturers extends Model {
     protected $hidden   = ['created_at', 'updated_at'];
     protected $fillable = ['name', 'email', 'website'];
 
-    public function products(): HasMany {
-        return $this->hasMany(Products::class);
+    public function Products(): HasMany {
+        return $this->hasMany(Products::class, 'manufacturers_id');
     }
 
 }
