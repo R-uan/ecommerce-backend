@@ -155,24 +155,6 @@ class ProductsController extends Controller {
         }
     }
 
-    /* 'name'             => ['required'],
-    'description'      => ['required'],
-    'image_url'        => ['url'],
-    'category'         => ['required', 'string'],
-    'availability'     => ['required'],
-    'unit_price'       => ['required'],
-    'manufacturers_id' => ['required', 'numeric'],
-
-    'product_details'  => [
-    'energy_system'       => ['required'],
-    'landing_system'      => ['required'],
-    'emergency_system'    => ['required'],
-    'propulsion_system'   => ['required'],
-    'navigation_system'   => ['required'],
-    'external_structure'  => ['required'],
-    'termic_protection'   => ['required'],
-    'comunication_system' => ['required'],
-    ], */
     /**
      * Update one product record given the id
      * @return \Illuminate\Http\JsonResponse

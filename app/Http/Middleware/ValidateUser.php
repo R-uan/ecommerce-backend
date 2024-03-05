@@ -26,17 +26,11 @@ class ValidateUser {
             }
         } catch (Exception $e) {
             if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenInvalidException) {
-                return response()->json([
-                    'messsage' => 'Invalid Token.',
-                ], Response::HTTP_UNAUTHORIZED);
+                return response()->json('Invalid Token.', Response::HTTP_UNAUTHORIZED);
             } else if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenExpiredException) {
-                return response()->json([
-                    'messsage' => 'Expired Token.',
-                ], Response::HTTP_UNAUTHORIZED);
+                return response()->json('Expired Token.', Response::HTTP_UNAUTHORIZED);
             } else {
-                return response()->json([
-                    'messsage' => 'Authorization Token not found.',
-                ], Response::HTTP_UNAUTHORIZED);
+                return response()->json('Authorization Token not found.', Response::HTTP_UNAUTHORIZED);
             }
         }
     }

@@ -16,17 +16,33 @@ class AuthenticationController extends Controller {
      * @return \Illuminate\Http\JsonResponse
      */
     public function login(Request $request) {
-        $credentials = ['email' => $request->email, 'password' => $request->password];
-        $token       = auth()->attempt($credentials);
-        if (!$token) {
-            return response()->json([
-                'message' => 'Unauthorized',
-            ], Response::HTTP_UNAUTHORIZED);
-        } else {
-            return response()->json([
-                'message' => 'Authentication Sucessful',
-                'token'   => $token,
-            ], Response::HTTP_OK);
+        try {
+            $credentials = ['email' => $request->email, 'password' => $request->password];
+            $token       = auth()->attempt($credentials);
+            if (!$token) {
+                return response()->json([
+                    'message' => 'Unauthorized',
+                ], Response::HTTP_UNAUTHORIZED);
+            } else {
+                return response()->json([
+                    'message' => 'Authentication Sucessful',
+                    'token'   => $token,
+                ], Response::HTTP_OK);
+            }
+        } catch (Exception $e) {
+            if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenInvalidException) {
+                return response()->json([
+                    'messsage' => 'Invalid Token.',
+                ], Response::HTTP_UNAUTHORIZED);
+            } else if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenExpiredException) {
+                return response()->json([
+                    'messsage' => 'Cannot Refresh.',
+                ], Response::HTTP_NOT_EXTENDED);
+            } else {
+                return response()->json([
+                    'messsage' => 'Authorization Token not found.',
+                ], Response::HTTP_UNAUTHORIZED);
+            }
         }
     }
 
@@ -40,10 +56,10 @@ class AuthenticationController extends Controller {
      */
     public function refresh(Request $request) {
         try {
-            $token    = JWTAuth::getToken();
-            $newToken = JWTAuth::refresh($token);
-            if ($newToken) {
-                return response()->json($newToken, Response::HTTP_OK);
+            $token     = JWTAuth::getToken();
+            $new_token = JWTAuth::refresh($token);
+            if ($new_token) {
+                return response()->json($new_token, Response::HTTP_OK);
             } else {
                 return response()->json([
                     'messsage' => 'Unable to refresh token.',
