@@ -11,10 +11,15 @@ return new class extends Migration {
     public function up(): void {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->float('total')->nullable();
+            $table->unsignedBigInteger('client_id');
+            $table->float('total');
             $table->string('status');
             $table->dateTime('order_date');
-            $table->unsignedBigInteger('client_id');
+            $table->string("payment_method");
+            $table->string("planet_destination");
+            $table->dateTime('payment_received')->nullable();
+            $table->dateTime('product_finished')->nullable();
+            $table->dateTime('order_finalized')->nullable();
             $table->timestamps();
         });
     }

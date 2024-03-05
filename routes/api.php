@@ -58,8 +58,9 @@ Route::prefix('/auth')->group(function () {
 
 Route::middleware(ValidateUser::class)->group(function () {
     Route::controller(OrdersController::class)->group(function () {
-        Route::post('/create/order', 'create');
-        Route::get('/orders', 'userOrders');
+        Route::post('/create/order', 'Create');
+        Route::get('/orders', 'ClientOrders');
+        Route::get('/orders/{id}', 'One')->where('id', '[0-9]+');
     });
 });
 

@@ -10,13 +10,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Orders extends Model {
     use HasFactory;
 
-    protected $fillable = ['status', 'order_date', 'total', 'client_id'];
+    protected $fillable = ['status', 'order_date', 'total', 'client_id', 'planet_destination', 'payment_method'];
+    protected $hidden   = ['created_at', 'updated_at', 'client_id'];
 
-    public function user(): BelongsTo {
+    public function User(): BelongsTo {
         return $this->belongsTo(User::class);
     }
 
-    public function orderItens(): HasMany {
+    public function OrderItens(): HasMany {
         return $this->hasMany(OrderItens::class);
     }
 }

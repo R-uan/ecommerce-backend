@@ -23,8 +23,10 @@ class StoreOrdersRequest extends FormRequest {
     public function rules(): array {
         return [
             'products' => [
-                'amount'     => 'required|numeric',
-                'product_id' => 'required|exists:products,id',
+                'amount'             => 'required|numeric',
+                'product_id'         => 'required|exists:products,id',
+                'planet_destination' => 'required',
+                'payment_method'     => 'required',
             ],
         ];
     }
