@@ -11,11 +11,11 @@ return new class extends Migration {
     public function up(): void {
         Schema::create('order_itens', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('product_id');
-            $table->unsignedBigInteger('orders_id');
-            $table->float('unit_price');
             $table->integer('amount');
+            $table->float('unit_price');
             $table->float('total_price');
+            $table->unsignedBigInteger('orders_id');
+            $table->unsignedBigInteger('product_id');
             $table->timestamps();
         });
     }
