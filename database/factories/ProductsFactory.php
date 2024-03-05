@@ -20,7 +20,6 @@ class ProductsFactory extends Factory {
             'name'              => $this->faker->name(),
             'short_description' => $this->faker->text(100),
             'long_description'  => $this->faker->text(300),
-            'insurance'         => $this->faker->text(5),
             'image_url'         => $this->faker->url(),
             'category'          => $this->faker->name(),
             'availability'      => $this->faker->boolean(),
