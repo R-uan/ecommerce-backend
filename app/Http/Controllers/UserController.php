@@ -26,8 +26,8 @@ class UserController extends Controller {
       if ($saved) {
         $token = JWTAuth::fromUser($user);
         return response()->json([
-          'user'      => $user,
-          'authToken' => $token,
+          'user'       => $user,
+          'auth_token' => $token,
         ], Response::HTTP_CREATED);
       } else {
         return response()->json([

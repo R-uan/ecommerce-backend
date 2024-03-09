@@ -5,19 +5,19 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void {
-        Schema::table('products', function (Blueprint $table) {
-            /* $table->index('name', 'products_name_idx'); */
-        });
-    }
+  /**
+   * Run the migrations.
+   */
+  public function up(): void {
+    Schema::table('products', function (Blueprint $table) {
+      $table->index('name', 'products_name_idx');
+    });
+  }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void {
-        //
-    }
+  /**
+   * Reverse the migrations.
+   */
+  public function down(): void {
+    //
+  }
 };

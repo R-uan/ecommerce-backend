@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Update\UpdateOrdersRequest;
 use App\Models\OrderItens;
 use App\Models\Orders;
+use App\Models\PlanetDestination;
 use App\Models\Products;
 use App\Services\Filters\OrdersQuery;
 use Illuminate\Http\Request;
@@ -22,13 +23,14 @@ class OrdersController extends Controller {
     $user_id = auth()->user()->id;
     DB::beginTransaction();
     try {
+      $destination        = PlanetDestination::where('id', $request->planet_destination)->exists();
       $initial_order_info = [
-        'total'              => 0,
-        'order_date'         => now(),
-        'client_id'          => $user_id,
-        'status'             => 'Pending',
-        'payment_method'     => $request->payment_method,
-        'planet_destination' => $request->planet_destination,
+        'total'                 => 0,
+        'order_date'            => now(),
+        'client_id'             => $user_id,
+        'status'                => 'Pending',
+        'payment_method'        => $request->payment_method,
+        'planet_destination_id' => $destination ? $request->planet_destination : throw new \ErrorException("Destination not found."),
       ];
 
       $order = new Orders($initial_order_info);
@@ -103,6 +105,9 @@ class OrdersController extends Controller {
       $order   = Orders::where('id', $id)
         ->where('client_id', $user_id)
         ->with([
+          'PlanetDestination'                => function ($query) {
+            $query->select('id', 'name', 'delivery_price', 'special_conditions');
+          },
           'OrderItens.products'              => function ($query) {
             $query->select('id', 'name', 'category', 'image_url', 'manufacturers_id');
           },
