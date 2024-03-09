@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\ManufacturersController;
 use App\Http\Controllers\OrdersController;
+use App\Http\Controllers\PlanetDestinationController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\UserController;
 use App\Http\Middleware\ValidateUser;
@@ -52,6 +53,15 @@ Route::prefix('/auth')->group(function () {
     });
 
   Route::post('/register', [UserController::class, 'Register']);
+});
+
+Route::prefix('/destinations')->group(function () {
+  Route::controller(PlanetDestinationController::class)->group(function () {
+    Route::get('/{name}', 'One');
+    Route::get('/', 'All');
+    Route::delete('/{id}', 'Delete');
+    Route::patch('/{id}', 'Update');
+  });
 });
 
 #endregion
