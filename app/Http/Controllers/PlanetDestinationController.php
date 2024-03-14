@@ -14,7 +14,7 @@ class PlanetDestinationController extends Controller {
 
   /**
    * Create one destination
-   * @return Illuminate\Http\JsonResponse
+   * @return \Illuminate\Http\JsonResponse
    */
   public function Create(StorePlanetDestinationRequest $request) {
     try {

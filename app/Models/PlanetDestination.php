@@ -10,6 +10,7 @@ class PlanetDestination extends Model {
   use HasFactory;
 
   protected $fillable = ['name', 'delivery_price', 'special_conditions'];
+  protected $hidden   = ['created_at', 'updated_at'];
 
   function orders(): HasMany {
     return $this->hasMany(Orders::class, 'planet_destination_id');

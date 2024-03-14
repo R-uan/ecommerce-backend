@@ -32,7 +32,8 @@ Route::prefix('/products')->group(function () {
     Route::get('/', 'All');
     Route::get('/{id}', 'One')->where('id', '[0-9]+');
     Route::get('/search', 'Search');
-    Route::get('/miniatures', 'AllPartial');
+    Route::get('/miniatures', 'Partial');
+    Route::post('/some', 'Some');
   });
 });
 

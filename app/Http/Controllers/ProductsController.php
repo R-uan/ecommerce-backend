@@ -9,6 +9,7 @@ use App\Models\Products;
 use App\Services\Filters\ProductsQuery;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class ProductsController extends Controller {
@@ -20,11 +21,14 @@ class ProductsController extends Controller {
    */
   public function All() {
     try {
-      $products = Products::with('productDetails')
-        ->join('manufacturers', 'products.manufacturers_id', '=', 'manufacturers.id')
-        ->select('products.*', 'manufacturers.name as manufacturer')
-        ->orderBy('name')
-        ->paginate(16);
+      $products = Cache::remember('all_products', now()->addMinutes(60), function () {
+        return Products::with('productDetails')
+          ->join('manufacturers', 'products.manufacturers_id', '=', 'manufacturers.id')
+          ->select('products.*', 'manufacturers.name as manufacturer')
+          ->orderBy('name')
+          ->paginate(16);
+      });
+
       return response()->json($products, Response::HTTP_OK);
     } catch (\Throwable $th) {
       return response()->json([
@@ -35,10 +39,10 @@ class ProductsController extends Controller {
   }
 
   /**
-   * Returns only the necessary amount of data to make a miniature of the whole product
+   * Returns only the necessary amount of data to make a miniature of the product
    * @return \Illuminate\Http\JsonResponse
    */
-  public function AllPartial() {
+  public function Partial(Request $request) {
     try {
       $products = Products::join('manufacturers', 'products.manufacturers_id', '=', 'manufacturers.id')
         ->select([
@@ -52,10 +56,35 @@ class ProductsController extends Controller {
         ])->orderBy('name')->paginate(16);
       return response()->json($products, Response::HTTP_OK);
     } catch (\Throwable $th) {
-      return response()->json([
-        'message' => 'Something went wrong.',
-        'error'   => $th->getMessage(),
-      ], Response::HTTP_INTERNAL_SERVER_ERROR);
+      return response()->json($th->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  /**
+   * Given an Array of IDs Returns only the necessary amount of data to make a miniature of the products
+   * @return \Illuminate\Http\JsonResponse
+   */
+  public function Some(Request $request) {
+    try {
+      $products = Products::join('manufacturers', 'products.manufacturers_id', '=', 'manufacturers.id')
+        ->select([
+          'products.id',
+          'products.name',
+          'products.category',
+          'products.image_url',
+          'products.availability',
+          'products.unit_price',
+          'manufacturers.name as manufacturer',
+        ])
+        ->whereIn('products.id', $request->products)
+        ->get();
+      if ($products) {
+        return response()->json($products, Response::HTTP_OK);
+      } else {
+        return response()->json('', Response::HTTP_NOT_FOUND);
+      }
+    } catch (\Throwable $th) {
+      return response()->json($th->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -74,9 +103,7 @@ class ProductsController extends Controller {
       if ($product) {
         return response()->json($product, Response::HTTP_OK);
       } else {
-        return response()->json([
-          'message' => sprintf('Product %s not found', $id),
-        ], Response::HTTP_NOT_FOUND);
+        return response()->json('Product ' . $id . ' was not found.', Response::HTTP_NOT_FOUND);
       }
     } catch (\Throwable $th) {
       return response()->json([
@@ -119,28 +146,29 @@ class ProductsController extends Controller {
   public function Store(StoreProductsRequest $request) {
     try {
       DB::beginTransaction();
-      $product = [
+      $product_input = [
         'name'              => $request->name,
         'description'       => $request->description,
         'image_url'         => $request->image_url,
         'category'          => $request->category,
         'availability'      => $request->availability,
+        'production_time'   => $request->production_time,
         'unit_price'        => $request->unit_price,
         'manufacturers_id'  => $request->manufacturers_id,
         'short_description' => $request->short_description,
         'long_description'  => $request->long_description,
       ];
 
-      $createdProduct = new Products($product);
-      $createdProduct->save();
+      $product = new Products($product_input);
+      $product->save();
 
-      if ($createdProduct) {
-        $productDetailsData          = $request->product_details;
-        $productDetails              = new ProductDetails($productDetailsData);
-        $productDetails->products_id = $createdProduct->id;
-        $productDetails->save();
+      if ($product) {
+        $product_details_input        = $request->product_details;
+        $product_details              = new ProductDetails($product_details_input);
+        $product_details->products_id = $product->id;
+        $product_details->save();
         DB::commit();
-        return response()->json([$createdProduct, $productDetails], Response::HTTP_CREATED);
+        return response()->json([$product, $product_details], Response::HTTP_CREATED);
       } else {
         DB::rollBack();
         return response()->json('Unable to create new product', Response::HTTP_I_AM_A_TEAPOT);
