@@ -11,8 +11,6 @@ jobs:
     services:
       postgres:
         image: postgres
-        env:
-          POSTGRES_PASSWORD: 7777
         ports:
           - 5432:5432
 
@@ -29,6 +27,8 @@ jobs:
       - name: Create test database
         run: |
           psql -h localhost -U postgres -c "CREATE DATABASE test_db;"
+        env:
+          PGPASSWORD: postgres
 
       - name: Install Dependencies
         run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
