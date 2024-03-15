@@ -12,8 +12,8 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
+// Covered by feature tests
 class ProductsController extends Controller {
-  #region Public Functions
 
   /**
    * Retrieves all products from database
@@ -35,56 +35,6 @@ class ProductsController extends Controller {
         'message' => 'Something went wrong.',
         'error'   => $th->getMessage(),
       ], Response::HTTP_INTERNAL_SERVER_ERROR);
-    }
-  }
-
-  /**
-   * Returns only the necessary amount of data to make a miniature of the product
-   * @return \Illuminate\Http\JsonResponse
-   */
-  public function Partial(Request $request) {
-    try {
-      $products = Products::join('manufacturers', 'products.manufacturers_id', '=', 'manufacturers.id')
-        ->select([
-          'products.id',
-          'products.name',
-          'products.category',
-          'products.image_url',
-          'products.availability',
-          'products.unit_price',
-          'manufacturers.name as manufacturer',
-        ])->orderBy('name')->paginate(16);
-      return response()->json($products, Response::HTTP_OK);
-    } catch (\Throwable $th) {
-      return response()->json($th->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
-    }
-  }
-
-  /**
-   * Given an Array of IDs Returns only the necessary amount of data to make a miniature of the products
-   * @return \Illuminate\Http\JsonResponse
-   */
-  public function Some(Request $request) {
-    try {
-      $products = Products::join('manufacturers', 'products.manufacturers_id', '=', 'manufacturers.id')
-        ->select([
-          'products.id',
-          'products.name',
-          'products.category',
-          'products.image_url',
-          'products.availability',
-          'products.unit_price',
-          'manufacturers.name as manufacturer',
-        ])
-        ->whereIn('products.id', $request->products)
-        ->get();
-      if ($products) {
-        return response()->json($products, Response::HTTP_OK);
-      } else {
-        return response()->json('', Response::HTTP_NOT_FOUND);
-      }
-    } catch (\Throwable $th) {
-      return response()->json($th->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -114,36 +64,10 @@ class ProductsController extends Controller {
   }
 
   /**
-   * Performs a search for orders based on specific criteria provided in the request.
-   * @return \Illuminate\Http\JsonResponse
-   */
-  public function Search(Request $request) {
-    try {
-      $filter   = new ProductsQuery();
-      $query    = $filter->Transform($request);
-      $products = Products::where($query)
-        ->join('manufacturers', 'products.manufacturers_id', '=', 'manufacturers.id')
-        ->select('products.*', 'manufacturers.name as manufacturer')
-        ->orderBy('name')
-        ->paginate(16)->withQueryString();
-      return response()->json($products, Response::HTTP_OK);
-    } catch (\Throwable $th) {
-      return response()->json([
-        'message' => 'Something went wrong.',
-        'error'   => $th->getMessage(),
-      ], Response::HTTP_INTERNAL_SERVER_ERROR);
-    }
-  }
-
-  #endregion
-
-  #region Administrative Functions
-
-  /**
    * Create one product record in the database
    * @return \Illuminate\Http\JsonResponse
    */
-  public function Store(StoreProductsRequest $request) {
+  public function Create(StoreProductsRequest $request) {
     try {
       DB::beginTransaction();
       $product_input = [
@@ -194,15 +118,10 @@ class ProductsController extends Controller {
         $product->update($request->all());
         return response()->json($product, Response::HTTP_OK);
       } else {
-        return response()->json([
-          'message' => sprintf('Product %s not found.', $id),
-        ], Response::HTTP_NOT_FOUND);
+        return response()->json('Product %s not found.', Response::HTTP_NOT_FOUND);
       }
     } catch (\Throwable $th) {
-      return response()->json([
-        'message' => 'Something went wrong.',
-        'error'   => $th->getMessage(),
-      ], Response::HTTP_INTERNAL_SERVER_ERROR);
+      return response()->json($th->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -213,15 +132,9 @@ class ProductsController extends Controller {
   public function Destroy(string $id) {
     try {
       $deleted = Products::destroy($id);
-      if ($deleted == 0) {
-        return response()->json([
-          'message' => sprintf('Product %s not found.', $id),
-        ], Response::HTTP_NOT_FOUND);
-      } else {
-        return response()->json([
-          'message' => sprintf('Product %s was sucessfuly deleted.', $id),
-        ]);
-      }
+      return response()->json($deleted,
+        $deleted == 0 ? Response::HTTP_NOT_FOUND : Response::HTTP_OK
+      );
     } catch (\Throwable $th) {
       return response()->json([
         'message' => 'Something went wrong.',
@@ -230,5 +143,75 @@ class ProductsController extends Controller {
     }
   }
 
-  #endregion
+  /**
+   * Performs a search for orders based on specific criteria provided in the request.
+   * @return \Illuminate\Http\JsonResponse
+   */
+  public function Search(Request $request) {
+    try {
+      $filter   = new ProductsQuery();
+      $query    = $filter->Transform($request);
+      $products = Products::where($query)
+        ->join('manufacturers', 'products.manufacturers_id', '=', 'manufacturers.id')
+        ->select('products.*', 'manufacturers.name as manufacturer')
+        ->orderBy('name')
+        ->paginate(16)->withQueryString();
+      return response()->json($products, Response::HTTP_OK);
+    } catch (\Throwable $th) {
+      return response()->json([
+        'message' => 'Something went wrong.',
+        'error'   => $th->getMessage(),
+      ], Response::HTTP_INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  /**
+   * Returns only the necessary amount of data to make a miniature of the product
+   * @return \Illuminate\Http\JsonResponse
+   */
+  public function AllMiniatures(Request $request) {
+    try {
+      $products = Products::join('manufacturers', 'products.manufacturers_id', '=', 'manufacturers.id')
+        ->select([
+          'products.id',
+          'products.name',
+          'products.category',
+          'products.image_url',
+          'products.unit_price',
+          'products.availability',
+          'manufacturers.name as manufacturer',
+        ])->orderBy('name')->paginate(16);
+      return response()->json($products, Response::HTTP_OK);
+    } catch (\Throwable $th) {
+      return response()->json($th->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  /**
+   * Given an Array of IDs Returns only the necessary amount of data to make a miniature of the products
+   * @return \Illuminate\Http\JsonResponse
+   */
+  public function SomeMiniatures(Request $request) {
+    try {
+      $products = Products::join('manufacturers', 'products.manufacturers_id', '=', 'manufacturers.id')
+        ->select([
+          'products.id',
+          'products.name',
+          'products.category',
+          'products.image_url',
+          'products.availability',
+          'products.unit_price',
+          'manufacturers.name as manufacturer',
+        ])
+        ->whereIn('products.id', $request->products)
+        ->get();
+      if ($products) {
+        return response()->json($products, Response::HTTP_OK);
+      } else {
+        return response()->json('', Response::HTTP_NOT_FOUND);
+      }
+    } catch (\Throwable $th) {
+      return response()->json($th->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
+    }
+  }
 }

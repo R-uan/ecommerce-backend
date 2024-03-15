@@ -6,6 +6,7 @@ use App\Http\Controllers\OrdersController;
 use App\Http\Controllers\PlanetDestinationController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\UserController;
+use App\Http\Middleware\ValidateAdmin;
 use App\Http\Middleware\ValidateUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -29,12 +30,19 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::prefix('/products')->group(function () {
   Route::controller(ProductsController::class)->group(function () {
-    Route::get('/', 'All');
-    Route::get('/{id}', 'One')->where('id', '[0-9]+');
-    Route::get('/search', 'Search');
-    Route::get('/miniatures', 'Partial');
-    Route::post('/some', 'Some');
+    Route::get('/', 'All'); # Has tests
+    Route::get('/search', 'Search'); # Has tests
+    Route::get('/miniatures', 'AllMiniatures'); # Has tests
+    Route::post('/miniatures', 'SomeMiniatures'); # Has tests
+    Route::get('/{id}', 'One')->where('id', '[0-9]+'); # Has tests
+
+    Route::middleware(ValidateAdmin::class)->group(function () {
+      Route::post('/', 'Create'); #Has tests
+      Route::patch('/{id}', 'Update')->where('id', '[0-9]+'); # Has tests
+      Route::delete('/{id}', 'Destroy')->where('id', '[0-9]+'); # Has tests
+    });
   });
+
 });
 
 Route::prefix('/manufacturers')->group(function () {
@@ -83,14 +91,6 @@ Route::middleware(ValidateUser::class)->group(function () {
 
 /* Route::middleware(ValidateAdmin::class)->group(function () { */
 Route::prefix("/admin")->group(function () {
-  Route::controller(ProductsController::class)->group(function () {
-    Route::prefix("/products")->group(function () {
-      Route::post('/', 'Store');
-      Route::patch('/{id}', 'Update')->where('id', '[0-9]+');
-      Route::delete('/{id}', 'Destroy')->where('id', '[0-9]+');
-    });
-  });
-
   Route::controller(ManufacturersController::class)->group(function () {
     Route::prefix("/manufacturers")->group(function () {
       Route::post('/', 'Store');
