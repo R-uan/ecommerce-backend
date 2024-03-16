@@ -102,10 +102,6 @@ class ManufacturersController extends Controller {
     }
   }
 
-  #endregion
-
-  #region Administrative Functions
-
   /**
    * Create one manufacturer record on the database
    * @return \Illuminate\Http\JsonResponse
@@ -114,18 +110,11 @@ class ManufacturersController extends Controller {
     try {
       $manufacturer = new Manufacturers($request->all());
       $saved        = $manufacturer->save();
-      if ($saved) {
-        return response()->json($saved, Response::HTTP_CREATED);
-      } else {
-        return response()->json([
-          'message' => 'Failed to save manufacturer.',
-        ], Response::HTTP_INTERNAL_SERVER_ERROR);
-      }
+      return $saved ?
+      response()->json($saved, Response::HTTP_CREATED) :
+      response()->json('Failed to save manufacturer', Response::HTTP_INTERNAL_SERVER_ERROR);
     } catch (\Throwable $th) {
-      return response()->json([
-        'message' => 'Something went wrong.',
-        'error'   => $th->getMessage(),
-      ], Response::HTTP_INTERNAL_SERVER_ERROR);
+      return response()->json($th->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -140,9 +129,7 @@ class ManufacturersController extends Controller {
         $manufacturer->update($request->all());
         return response()->json($manufacturer, Response::HTTP_OK);
       } else {
-        return response()->json([
-          'message' => sprintf('Manufacturer %s no found.', $id),
-        ], Response::HTTP_NOT_FOUND);
+        return response()->json(sprintf('Manufacturer %s no found.', $id), Response::HTTP_NOT_FOUND);
       }
     } catch (\Throwable $th) {
       return response()->json([
@@ -159,22 +146,9 @@ class ManufacturersController extends Controller {
   public function Destroy(string $id) {
     try {
       $deleted = Manufacturers::destroy($id);
-      if ($deleted != 0) {
-        return response()->json([
-          'message' => sprintf('Manufacturer %s was sucessfuly deleted.', $id),
-        ], Response::HTTP_OK);
-      } else {
-        return response()->json([
-          'message' => sprintf('Manufacturer %s was not found.', $id),
-        ], Response::HTTP_NOT_FOUND);
-      }
+      return response()->json($deleted, $deleted != 0 ? Response::HTTP_OK : Response::HTTP_NOT_FOUND);
     } catch (\Throwable $th) {
-      return response()->json([
-        'message' => 'Something went wrong.',
-        'error'   => $th->getMessage(),
-      ], Response::HTTP_INTERNAL_SERVER_ERROR);
+      return response()->json($th->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
-
-  #endregion
 }

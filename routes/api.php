@@ -51,6 +51,12 @@ Route::prefix('/manufacturers')->group(function () {
     Route::get('/search', 'Search');
     Route::get('/{id}', 'One')->where('id', '[0-9]+');
     Route::get('/{id}/products', 'Products')->where('id', '[0-9]+');
+
+    Route::middleware(ValidateAdmin::class)->group(function () {
+      Route::post('/', 'Create');
+      Route::patch('/{id}', 'Update')->where('id', '[0-9]+');
+      Route::delete('/{id}', 'Destroy')->where('id', '[0-9]+');
+    });
   });
 });
 
@@ -89,16 +95,7 @@ Route::middleware(ValidateUser::class)->group(function () {
 
 #region Administrative Endpoints
 
-/* Route::middleware(ValidateAdmin::class)->group(function () { */
-Route::prefix("/admin")->group(function () {
-  Route::controller(ManufacturersController::class)->group(function () {
-    Route::prefix("/manufacturers")->group(function () {
-      Route::post('/', 'Store');
-      Route::patch('/{id}', 'Update')->where('id', '[0-9]+');
-      Route::delete('/{id}', 'Destroy')->where('id', '[0-9]+');
-    });
-  });
-
+Route::controller(ManufacturersController::class)->group(function () {
   Route::controller(OrdersController::class)->group(function () {
     Route::prefix('/orders')->group(function () {
       Route::get('/orders', 'All');
@@ -106,6 +103,5 @@ Route::prefix("/admin")->group(function () {
     });
   });
 });
-/* }); */
 
 #endregion
