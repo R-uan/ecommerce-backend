@@ -25,24 +25,14 @@ class UserController extends Controller {
       $saved         = $user->save();
       if ($saved) {
         $token = JWTAuth::fromUser($user);
-        return response()->json([
-          'user'       => $user,
-          'auth_token' => $token,
-        ], Response::HTTP_CREATED);
+        return response()->json($token, Response::HTTP_CREATED);
       } else {
-        return response()->json([
-          'message' => "Failed to register user.",
-        ], Response::HTTP_BAD_REQUEST);
+        return response()->json("Failed to register user.", Response::HTTP_BAD_REQUEST);
       }
     } catch (\Throwable $th) {
-      if ($th->getCode() == 23505) {
-        return response()->json(
-          "Email already registered."
-          , Response::HTTP_CONFLICT);
-      }
-      return response()->json(
-        $th->getMessage()
-        , Response::HTTP_INTERNAL_SERVER_ERROR);
+      return $th->getCode() == 23505 ?
+      response()->json("Email already registered.", Response::HTTP_CONFLICT) :
+      response()->json($th->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
 

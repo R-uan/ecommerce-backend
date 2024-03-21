@@ -49,8 +49,8 @@ Route::prefix('/manufacturers')->group(function () {
   Route::controller(ManufacturersController::class)->group(function () {
     Route::get('/', 'All');
     Route::get('/search', 'Search');
+    Route::get('/products/{name}', 'Products');
     Route::get('/{id}', 'One')->where('id', '[0-9]+');
-    Route::get('/{id}/products', 'Products')->where('id', '[0-9]+');
 
     Route::middleware(ValidateAdmin::class)->group(function () {
       Route::post('/', 'Create');

@@ -6,6 +6,7 @@ use App\Http\Requests\Store\StoreManufacturersRequest;
 use App\Http\Requests\Update\UpdateManufacturersRequest;
 use App\Models\Manufacturers;
 use App\Services\Filters\ManufacturersQuery;
+use App\Services\Filters\ProductsQuery;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -80,10 +81,13 @@ class ManufacturersController extends Controller {
    * Gets first 10 products based on the manufacturer
    * @return \Illuminate\Http\JsonResponse
    */
-  public function Products(string $id) {
+  public function Products(Request $request, string $name) {
     try {
-      $response = Manufacturers::where('manufacturers.id', $id)
+      $filter   = new ProductsQuery();
+      $query    = $filter->Transform($request);
+      $response = Manufacturers::where('manufacturers.name', 'ilike', '%' . $name . '%')
         ->join('products', 'products.manufacturers_id', '=', 'manufacturers.id')
+        ->where($query)
         ->select(
           'products.id',
           'products.name',
@@ -92,7 +96,8 @@ class ManufacturersController extends Controller {
           'products.unit_price',
           'products.availability',
           'manufacturers.name as manufacturer'
-        )->take(10)->get();
+        )->orderBy('name')
+        ->paginate();
       return response()->json($response, Response::HTTP_OK);
     } catch (\Throwable $th) {
       return response()->json([

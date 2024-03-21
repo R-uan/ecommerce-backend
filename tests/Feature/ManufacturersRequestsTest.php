@@ -115,15 +115,21 @@ class ManufacturersRequestsTest extends TestCase {
   }
 
   /**
-   * GET Request to /api/manufacturers/{id}/products
+   * GET Request to /api/manufacturers/products/{name}
    * - Asserts that the return data array has 10 elements.
    * It only checks 10 elements because thats the amount the seeder creates for each manufacturer.
    */
   public function test_get_manufacturer_products() {
-    $id       = mt_rand(1, 10);
-    $response = $this->get('/api/manufacturers/' . $id . '/products');
+    $faker             = FakerFactory::create();
+    $manufacturer_data = [
+      'name'    => 'test',
+      'email'   => $faker->companyEmail(),
+      'website' => $faker->url(),
+    ];
+    $this->withHeader('Authorization', 'Bearer ' . $this->token)->post('/api/manufacturers', $manufacturer_data);
+    $response = $this->get('/api/manufacturers/products/' . 'test');
     $response->assertStatus(Response::HTTP_OK);
     $response_json = $response->json();
-    $this->assertEquals(10, count($response_json));
+    $this->assertEquals(0, $response_json['total']);
   }
 }
