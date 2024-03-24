@@ -115,7 +115,7 @@ class ManufacturersRequestsTest extends TestCase {
   }
 
   /**
-   * GET Request to /api/manufacturers/products/{name}
+   * GET Request to /api/manufacturers/{name}/search
    * - Asserts that the return data array has 10 elements.
    * It only checks 10 elements because thats the amount the seeder creates for each manufacturer.
    */
@@ -127,7 +127,7 @@ class ManufacturersRequestsTest extends TestCase {
       'website' => $faker->url(),
     ];
     $this->withHeader('Authorization', 'Bearer ' . $this->token)->post('/api/manufacturers', $manufacturer_data);
-    $response = $this->get('/api/manufacturers/products/' . 'test');
+    $response = $this->get('/api/manufacturers/' . 'test' . '/search');
     $response->assertStatus(Response::HTTP_OK);
     $response_json = $response->json();
     $this->assertEquals(0, $response_json['total']);
