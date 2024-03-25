@@ -13,8 +13,6 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 
 class OrdersController extends Controller {
-  #region Authenticated Client Function
-
   /**
    * Creates a new order record under the authenticated client
    * @return \Illuminate\Http\JsonResponse
@@ -33,7 +31,8 @@ class OrdersController extends Controller {
         'planet_destination_id' => $destination ? $request->planet_destination : throw new \ErrorException("Destination not found."),
       ];
 
-      $order = new Orders($initial_order_info);
+      $unavailable_products = [];
+      $order                = new Orders($initial_order_info);
       $order->save();
       $total_price = 0;
 
@@ -52,28 +51,29 @@ class OrdersController extends Controller {
           $order_itens = new OrderItens($item);
           $order_itens->save();
         } else {
-          DB::rollBack();
-          return response()->json([
-            'message'             => 'One of the products is not available',
-            'unavailable_product' => [
-              'product_id'   => $cart_product['product_id'],
-              'product_info' => $product ? $product : null,
-            ],
-          ], Response::HTTP_BAD_REQUEST);
+          array_push($unavailable_products, [
+            'product_id'   => $cart_product['product_id'],
+            'product_info' => $product ? $product : null,
+          ]);
         }
       }
 
-      $order->total = $total_price;
-      $order->save();
-      DB::commit();
+      if (count($unavailable_products) > 0) {
+        DB::rollBack();
+        return response()->json([
+          'message'              => 'One of more products are not available.',
+          'unavailable_products' => $unavailable_products,
+        ], Response::HTTP_BAD_REQUEST);
+      } else {
+        $order->total = $total_price;
+        $order->save();
+        DB::commit();
+        return response()->json($order, Response::HTTP_OK);
+      }
 
-      return response()->json($order, Response::HTTP_OK);
     } catch (\Throwable $th) {
       DB::rollBack();
-      return response()->json([
-        'message' => 'Something went wrong.',
-        'error'   => $th->getMessage(),
-      ], Response::HTTP_INTERNAL_SERVER_ERROR);
+      return response()->json($th->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -88,10 +88,7 @@ class OrdersController extends Controller {
       $query = Orders::where('client_id', $id)->with('orderItens')->get();
       return response()->json($query, Response::HTTP_OK);
     } catch (\Throwable $th) {
-      return response()->json([
-        'message' => 'Something went wrong.',
-        'error'   => $th->getMessage(),
-      ], Response::HTTP_INTERNAL_SERVER_ERROR);
+      return response()->json($th->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -99,7 +96,7 @@ class OrdersController extends Controller {
    * Retrieves one order record from the database
    * @return \Illuminate\Http\JsonResponse
    */
-  public function One(Request $request, string $id) {
+  public function One(string $id) {
     try {
       $user_id = auth()->user()->id;
       $order   = Orders::where('id', $id)
@@ -116,24 +113,13 @@ class OrdersController extends Controller {
           },
         ])
         ->first();
-      if (!$order) {
-        return response()->json([
-          'message' => sprintf('Order %s not found!', $id),
-        ], Response::HTTP_NOT_FOUND);
-      }
-
-      return response()->json($order, Response::HTTP_OK);
+      return $order ?
+      response()->json($order, Response::HTTP_OK) :
+      response()->json(sprintf('Order %s not found!', $id), Response::HTTP_NOT_FOUND);
     } catch (\Throwable $th) {
-      return response()->json([
-        'message' => 'Something went wrong.',
-        'error'   => $th->getMessage(),
-      ], Response::HTTP_INTERNAL_SERVER_ERROR);
+      return response()->json($th->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
-
-  #endregion
-
-  #region Administrative Functions
 
   /**
    * Retrieves all orders records from the database
@@ -144,10 +130,7 @@ class OrdersController extends Controller {
       $orders = Orders::all()->paginate();
       return response()->json($orders, Response::HTTP_OK);
     } catch (\Throwable $th) {
-      return response()->json([
-        'message' => 'Something went wrong.',
-        'error'   => $th->getMessage(),
-      ], Response::HTTP_INTERNAL_SERVER_ERROR);
+      return response()->json($th->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -157,23 +140,12 @@ class OrdersController extends Controller {
    */
   public function Destroy(string $id) {
     try {
-      $order  = Orders::find($id);
       $delete = Orders::destroy($id);
-      if ($delete != 0) {
-        return response()->json([
-          'message' => sprintf('Order was %s deleted', $id),
-          'data'    => $order,
-        ], Response::HTTP_OK);
-      } else {
-        return response()->json([
-          'message' => sprintf('Order %s was not found.', $id),
-        ], Response::HTTP_NOT_FOUND);
-      }
+      return $delete == 1 ?
+      response()->json(sprintf('Order was %s deleted', $id), Response::HTTP_OK) :
+      response()->json(sprintf('Order %s was not found.', $id), Response::HTTP_NOT_FOUND);
     } catch (\Throwable $th) {
-      return response()->json([
-        'message' => 'Something went wrong.',
-        'error'   => $th->getMessage(),
-      ], Response::HTTP_INTERNAL_SERVER_ERROR);
+      return response()->json($th->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -188,15 +160,10 @@ class OrdersController extends Controller {
         $order->update($request->all());
         return response()->json($order, Response::HTTP_OK);
       } else {
-        return response()->json([
-          'message' => sprintf('Order %s not found.', $id),
-        ], Response::HTTP_NOT_FOUND);
+        return response()->json(sprintf('Order %s not found.', $id), Response::HTTP_NOT_FOUND);
       }
     } catch (\Throwable $th) {
-      return response()->json([
-        'message' => 'Something went wrong.',
-        'error'   => $th->getMessage(),
-      ], Response::HTTP_INTERNAL_SERVER_ERROR);
+      return response()->json($th->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -209,19 +176,9 @@ class OrdersController extends Controller {
       $filter = new OrdersQuery();
       $query  = $filter->Transform($request);
       $orders = Orders::where($query)->paginate();
-      if (count($orders->all()) > 0) {
-        return response()->json($orders, Response::HTTP_OK);
-      } else {
-        return response()->json([
-          'message' => 'Nothing found.',
-        ], Response::HTTP_NOT_FOUND);
-      }
+      return response()->json($orders, Response::HTTP_OK);
     } catch (\Throwable $th) {
-      return response()->json([
-        'message' => 'Something went wrong.',
-      ], Response::HTTP_INTERNAL_SERVER_ERROR);
+      return response()->json($th->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
-
-  #endregion
 }

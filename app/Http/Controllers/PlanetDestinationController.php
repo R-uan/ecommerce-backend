@@ -61,16 +61,9 @@ class PlanetDestinationController extends Controller {
   public function All() {
     try {
       $destinations = PlanetDestination::all();
-      if ($destinations) {
-        return response()
-          ->json($destinations, Response::HTTP_OK);
-      } else {
-        return response()
-          ->json('Nothing found.', Response::HTTP_NO_CONTENT);
-      }
+      return response()->json($destinations, Response::HTTP_OK);
     } catch (\Throwable $th) {
-      return response()
-        ->json($th->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
+      return response()->json($th->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -82,16 +75,11 @@ class PlanetDestinationController extends Controller {
     try {
       $planet = PlanetDestination::find($id)->name;
       $delete = PlanetDestination::destroy($id);
-      if ($delete == 1) {
-        return response()
-          ->json(sprintf('Destination %s deleted.', $planet), Response::HTTP_OK);
-      } else {
-        return response()
-          ->json('Destination not found.', Response::HTTP_NOT_FOUND);
-      }
+      return $delete == 1 ?
+      response()->json(sprintf('Destination %s deleted.', $planet), Response::HTTP_OK) :
+      response()->json('Destination not found.', Response::HTTP_NOT_FOUND);
     } catch (\Throwable $th) {
-      return response()
-        ->json($th->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
+      return response()->json($th->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -102,19 +90,15 @@ class PlanetDestinationController extends Controller {
   public function Update(Request $request, $id) {
     try {
       DB::beginTransaction();
-      $destination_to_update = PlanetDestination::find($id);
-      $destination_to_update->Update($request->all());
-      if ($destination_to_update) {
+      $destination = PlanetDestination::find($id);
+      $destination->Update($request->all());
+      if ($destination) {
         DB::commit();
-        return response()
-          ->json($destination_to_update, Response::HTTP_OK);
+        return response()->json($destination, Response::HTTP_OK);
       } else {
         DB::rollBack();
-        return response()
-          ->json('shrug', Response::HTTP_NO_CONTENT);
+        return response()->json('shrug', Response::HTTP_NO_CONTENT);
       }
-
-      dd($destination_to_update);
     } catch (\Throwable $th) {
       DB::rollBack();
       return response()

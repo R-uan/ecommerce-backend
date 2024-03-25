@@ -17,13 +17,9 @@ class ValidateUser {
     try {
       $auth_header = explode(" ", $request->header('Authorization'));
       $valid_user  = JWTAuth::parseToken($auth_header[1])->authenticate();
-      if ($valid_user) {
-        return $next($request);
-      } else {
-        return response()->json([
-          'message' => 'Unable to authenticate user.',
-        ], Response::HTTP_UNAUTHORIZED);
-      }
+      return $valid_user ?
+      $next($request) :
+      response()->json('Unable to authenticate user.', Response::HTTP_UNAUTHORIZED);
     } catch (Exception $e) {
       if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenInvalidException) {
         return response()->json('Invalid Token.', Response::HTTP_UNAUTHORIZED);
