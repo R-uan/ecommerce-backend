@@ -1,9 +1,14 @@
 version: "3"
 services:
-    ecommerce-backend:
+    postgres-maindb:
         image: postgres
         ports:
             - "5432:5432"
         environment:
-            POSTGRES_PASSWORD: 7777
+            POSTGRES_PASSWORD: postgres
         restart: always
+
+    redis-cache:
+        image: redis
+        ports:
+            - "6379:6379"
