@@ -9,25 +9,23 @@ use App\Services\Filters\ManufacturersQuery;
 use App\Services\Filters\ProductsQuery;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Cache;
 
 class ManufacturersController extends Controller {
-  #region Public Functions
-
   /**
    * Gets all manufacturer records in the database
    * @return \Illuminate\Http\JsonResponse
    */
   public function All() {
     try {
-      $manufacturers = Manufacturers::select('manufacturers.*')
-        ->orderBy('id')
-        ->paginate();
+      $manufacturers = Cache::remember('all_manufacturers', 1, function () {
+        return Manufacturers::select('manufacturers.*')
+          ->orderBy('id')
+          ->paginate();
+      });
       return response()->json($manufacturers, Response::HTTP_OK);
     } catch (\Throwable $th) {
-      return response()->json([
-        'message' => 'Something went wrong.',
-        'error'   => $th->getMessage(),
-      ], Response::HTTP_INTERNAL_SERVER_ERROR);
+      return response()->json($th->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -38,18 +36,11 @@ class ManufacturersController extends Controller {
   public function One(string $id) {
     try {
       $manufacturer = Manufacturers::find($id);
-      if ($manufacturer) {
-        return response()->json($manufacturer, Response::HTTP_OK);
-      } else {
-        return response()->json([
-          'message' => sprintf('Manufacturer %s not found.', $id),
-        ], Response::HTTP_NOT_FOUND);
-      }
+      $manufacturer ?
+      response()->json($manufacturer, Response::HTTP_OK) :
+      response()->json(sprintf('Manufacturer %s not found.', $id), Response::HTTP_NOT_FOUND);
     } catch (\Throwable $th) {
-      return response()->json([
-        'message' => 'Something went wrong.',
-        'error'   => $th->getMessage(),
-      ], Response::HTTP_INTERNAL_SERVER_ERROR);
+      return response()->json($th->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -62,18 +53,11 @@ class ManufacturersController extends Controller {
       $filter        = new ManufacturersQuery();
       $query         = $filter->Transform($request);
       $manufacturers = Manufacturers::where($query)->paginate();
-      if ($manufacturers) {
-        return response()->json($manufacturers, Response::HTTP_OK);
-      } else {
-        return response()->json([
-          'message' => 'Nothing found',
-        ], Response::HTTP_NOT_FOUND);
-      }
+      return $manufacturers ?
+      response()->json($manufacturers, Response::HTTP_OK) :
+      response()->json('Nothing found', Response::HTTP_NOT_FOUND);
     } catch (\Throwable $th) {
-      return response()->json([
-        'message' => 'Something went wrong.',
-        'error'   => $th->getMessage(),
-      ], Response::HTTP_INTERNAL_SERVER_ERROR);
+      return response()->json($th->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -87,23 +71,18 @@ class ManufacturersController extends Controller {
       $query    = $filter->Transform($request);
       $response = Manufacturers::where('manufacturers.name', 'ilike', '%' . $name . '%')
         ->join('products', 'products.manufacturers_id', '=', 'manufacturers.id')
-        ->where($query)
-        ->select(
-          'products.id',
-          'products.name',
-          'products.category',
-          'products.image_url',
-          'products.unit_price',
-          'products.availability',
-          'manufacturers.name as manufacturer'
-        )->orderBy('name')
-        ->paginate();
+        ->where($query)->select(
+        'products.id',
+        'products.name',
+        'products.category',
+        'products.image_url',
+        'products.unit_price',
+        'products.availability',
+        'manufacturers.name as manufacturer'
+      )->orderBy('name')->paginate();
       return response()->json($response, Response::HTTP_OK);
     } catch (\Throwable $th) {
-      return response()->json([
-        'message' => 'Something went wrong.',
-        'error'   => $th->getMessage(),
-      ], Response::HTTP_INTERNAL_SERVER_ERROR);
+      return response()->json($th->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -117,7 +96,7 @@ class ManufacturersController extends Controller {
       $saved        = $manufacturer->save();
       return $saved ?
       response()->json($saved, Response::HTTP_CREATED) :
-      response()->json('Failed to save manufacturer', Response::HTTP_INTERNAL_SERVER_ERROR);
+      response()->json('Failed to save manufacturer', Response::HTTP_NOT_MODIFIED);
     } catch (\Throwable $th) {
       return response()->json($th->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
@@ -137,10 +116,7 @@ class ManufacturersController extends Controller {
         return response()->json(sprintf('Manufacturer %s no found.', $id), Response::HTTP_NOT_FOUND);
       }
     } catch (\Throwable $th) {
-      return response()->json([
-        'message' => 'Something went wrong.',
-        'error'   => $th->getMessage(),
-      ], Response::HTTP_INTERNAL_SERVER_ERROR);
+      return response()->json($th->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
 

@@ -9,8 +9,6 @@ use Illuminate\Support\Facades\Auth;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthenticationController extends Controller {
-  #region Public Function
-
   /**
    * Gets a JWT via given credentials.
    * @return \Illuminate\Http\JsonResponse
@@ -19,34 +17,19 @@ class AuthenticationController extends Controller {
     try {
       $credentials = ['email' => $request->email, 'password' => $request->password];
       $token       = auth()->attempt($credentials);
-
-      if (!$token) {
-        return response()->json([
-          'message' => 'Unauthorized.',
-        ], Response::HTTP_UNAUTHORIZED);
-      } else {
-        return response()->json($token, Response::HTTP_OK);
-      }
+      return $token ?
+      response()->json($token, Response::HTTP_OK) :
+      response()->json('Unauthorized.', Response::HTTP_UNAUTHORIZED);
     } catch (Exception $e) {
       if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenInvalidException) {
-        return response()->json([
-          'messsage' => 'Invalid Token.',
-        ], Response::HTTP_UNAUTHORIZED);
+        return response()->json('Invalid token received.', Response::HTTP_UNAUTHORIZED);
       } else if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenExpiredException) {
-        return response()->json([
-          'messsage' => 'Cannot Refresh.',
-        ], Response::HTTP_NOT_EXTENDED);
+        return response()->json('Token expired.', Response::HTTP_NOT_EXTENDED);
       } else {
-        return response()->json([
-          'messsage' => 'Token not found.',
-        ], Response::HTTP_UNAUTHORIZED);
+        return response()->json('Token was not found.', Response::HTTP_UNAUTHORIZED);
       }
     }
   }
-
-  #endregion
-
-  #region System Functions
 
   /**
    * Refresh Token if >1 week old
@@ -56,29 +39,17 @@ class AuthenticationController extends Controller {
     try {
       $token     = JWTAuth::getToken();
       $new_token = JWTAuth::refresh($token);
-      if ($new_token) {
-        return response()->json($new_token, Response::HTTP_OK);
-      } else {
-        return response()->json([
-          'messsage' => 'Unable to refresh token.',
-        ], Response::HTTP_NOT_EXTENDED);
-      }
+      return $new_token ?
+      response()->json($new_token, Response::HTTP_OK) :
+      response()->json('Unable to refresh token.', Response::HTTP_NOT_EXTENDED);
     } catch (Exception $e) {
       if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenInvalidException) {
-        return response()->json([
-          'messsage' => 'Invalid Token.',
-        ], Response::HTTP_UNAUTHORIZED);
+        return response()->json('Invalid Token.', Response::HTTP_UNAUTHORIZED);
       } else if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenExpiredException) {
-        return response()->json([
-          'messsage' => 'Cannot Refresh.',
-        ], Response::HTTP_NOT_EXTENDED);
+        return response()->json('Cannot Refresh.', Response::HTTP_NOT_EXTENDED);
       } else {
-        return response()->json([
-          'messsage' => 'Authorization Token not found.',
-        ], Response::HTTP_UNAUTHORIZED);
+        return response()->json('Token was not found.', Response::HTTP_UNAUTHORIZED);
       }
     }
   }
-
-  #endregion
 }

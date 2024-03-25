@@ -11,8 +11,6 @@ use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class UserController extends Controller {
-  #region Public Functions
-
   /**
    * Create a user record in the database
    * @return \Illuminate\Http\JsonResponse
@@ -43,18 +41,11 @@ class UserController extends Controller {
   public function Profile() {
     try {
       $authenticated_user = auth()->user();
-      if ($authenticated_user) {
-        return response()->json($authenticated_user, Response::HTTP_OK);
-      } else {
-        return response()->json([
-          'message' => 'Could not authenticate user.',
-        ], Response::HTTP_UNAUTHORIZED);
-      }
+      return $authenticated_user ?
+      response()->json($authenticated_user, Response::HTTP_OK) :
+      response()->json('Could not authenticate user.', Response::HTTP_UNAUTHORIZED);
     } catch (\Throwable $th) {
-      return response()->json([
-        'message' => 'Something went wrong.',
-        'error'   => $th->getMessage(),
-      ], Response::HTTP_INTERNAL_SERVER_ERROR);
+      return response()->json($th->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -74,27 +65,16 @@ class UserController extends Controller {
           return response()->json($user, Response::HTTP_OK);
         } else {
           DB::rollBack();
-          return response()->json([
-            'message' => 'Something went wrong during the update.',
-          ], Response::HTTP_NOT_MODIFIED);
+          return response()->json('Unable to update the user.', Response::HTTP_NOT_MODIFIED);
         }
       } else {
-        return response()->json([
-          'message' => 'Could not authenticate user.',
-        ], Response::HTTP_UNAUTHORIZED);
+        return response()->json('Could not authenticate user.', Response::HTTP_UNAUTHORIZED);
       }
     } catch (\Throwable $th) {
       DB::rollBack();
-      return response()->json([
-        'message' => 'Something went wrong.',
-        'error'   => $th->getMessage(),
-      ], Response::HTTP_INTERNAL_SERVER_ERROR);
+      return response()->json($th->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
-
-  #endregion
-
-  #region Administrative Functions
 
   /**
    * Gets all user records
@@ -105,10 +85,7 @@ class UserController extends Controller {
       $users = User::all()->paginate();
       return response()->json($users, Response::HTTP_OK);
     } catch (\Throwable $th) {
-      return response()->json([
-        'message' => 'Something went wrong.',
-        'error'   => $th->getMessage(),
-      ], Response::HTTP_INTERNAL_SERVER_ERROR);
+      return response()->json($th->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -119,18 +96,11 @@ class UserController extends Controller {
   public function One(string $id) {
     try {
       $user = User::find($id);
-      if ($user) {
-        return response()->json($user, Response::HTTP_OK);
-      } else {
-        return response()->json([
-          'message' => sprintf('User %s was not found.', $id),
-        ], Response::HTTP_NOT_FOUND);
-      }
+      return $user ?
+      response()->json($user, Response::HTTP_OK) :
+      response()->json(sprintf('User %s was not found.', $id), Response::HTTP_NOT_FOUND);
     } catch (\Throwable $th) {
-      return response()->json([
-        'message' => 'Something went wrong.',
-        'error'   => $th->getMessage(),
-      ], Response::HTTP_INTERNAL_SERVER_ERROR);
+      return response()->json($th->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -141,22 +111,11 @@ class UserController extends Controller {
   public function Destroy(string $id) {
     try {
       $deleted = User::destroy($id);
-      if ($deleted) {
-        return response()->json([
-          'message' => sprintf('User %s was successfully deleted.', $id),
-        ], Response::HTTP_OK);
-      } else {
-        return response()->json([
-          'message' => sprintf('User %s was not found.', $id),
-        ], Response::HTTP_NOT_FOUND);
-      }
+      $deleted == 1 ?
+      response()->json(sprintf('User %s was successfully deleted.', $id), Response::HTTP_OK) :
+      response()->json(sprintf('User %s was not found.', $id), Response::HTTP_NOT_FOUND);
     } catch (\Throwable $th) {
-      return response()->json([
-        'message' => 'something went wrong.',
-        'error'   => $th->getMessage(),
-      ], Response::HTTP_INTERNAL_SERVER_ERROR);
+      return response()->json($th->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
-
-  #endregion
 }
