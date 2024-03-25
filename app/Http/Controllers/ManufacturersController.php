@@ -36,7 +36,7 @@ class ManufacturersController extends Controller {
   public function One(string $id) {
     try {
       $manufacturer = Manufacturers::find($id);
-      $manufacturer ?
+      return $manufacturer ?
       response()->json($manufacturer, Response::HTTP_OK) :
       response()->json(sprintf('Manufacturer %s not found.', $id), Response::HTTP_NOT_FOUND);
     } catch (\Throwable $th) {
@@ -127,7 +127,7 @@ class ManufacturersController extends Controller {
   public function Destroy(string $id) {
     try {
       $deleted = Manufacturers::destroy($id);
-      return response()->json($deleted, $deleted != 0 ? Response::HTTP_OK : Response::HTTP_NOT_FOUND);
+      return response()->json($deleted, $deleted == 1 ? Response::HTTP_OK : Response::HTTP_NOT_FOUND);
     } catch (\Throwable $th) {
       return response()->json($th->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
