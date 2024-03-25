@@ -170,16 +170,18 @@ class ProductsController extends Controller {
    */
   public function AllMiniatures(Request $request) {
     try {
-      $products = Products::join('manufacturers', 'products.manufacturers_id', '=', 'manufacturers.id')
-        ->select([
-          'products.id',
-          'products.name',
-          'products.category',
-          'products.image_url',
-          'products.unit_price',
-          'products.availability',
-          'manufacturers.name as manufacturer',
-        ])->orderBy('name')->paginate(16);
+      $products = Cache::remember('all_miniatures', now()->addMinutes(60), function () {
+        return Products::join('manufacturers', 'products.manufacturers_id', '=', 'manufacturers.id')
+          ->select([
+            'products.id',
+            'products.name',
+            'products.category',
+            'products.image_url',
+            'products.unit_price',
+            'products.availability',
+            'manufacturers.name as manufacturer',
+          ])->orderBy('name')->paginate(16);
+      });
       return response()->json($products, Response::HTTP_OK);
     } catch (\Throwable $th) {
       return response()->json($th->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);

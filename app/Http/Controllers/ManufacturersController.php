@@ -18,7 +18,7 @@ class ManufacturersController extends Controller {
    */
   public function All() {
     try {
-      $manufacturers = Cache::remember('all_manufacturers', 1, function () {
+      $manufacturers = Cache::remember('all_manufacturers', now()->addMinutes(60), function () {
         return Manufacturers::select('manufacturers.*')
           ->orderBy('id')
           ->paginate();
