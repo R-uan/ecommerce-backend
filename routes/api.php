@@ -79,10 +79,6 @@ Route::prefix('/destinations')->group(function () {
   });
 });
 
-#endregion
-
-#region User Endpoints
-
 Route::middleware(ValidateUser::class)->group(function () {
   Route::controller(OrdersController::class)->group(function () {
     Route::post('/orders', 'Create');
@@ -91,17 +87,9 @@ Route::middleware(ValidateUser::class)->group(function () {
   });
 });
 
-#endregion
-
-#region Administrative Endpoints
-
-Route::controller(ManufacturersController::class)->group(function () {
+Route::prefix('/orders')->group(function () {
   Route::controller(OrdersController::class)->group(function () {
-    Route::prefix('/orders')->group(function () {
-      Route::get('/orders', 'All');
-      Route::get('/search', 'Search');
-    });
+    Route::get('/orders', 'All');
+    Route::get('/search', 'Search');
   });
 });
-
-#endregion
