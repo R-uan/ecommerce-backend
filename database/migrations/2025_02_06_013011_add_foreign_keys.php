@@ -45,9 +45,16 @@ return new class extends Migration {
         ->on('orders')
         ->onDelete('no action');
     });
+
+    Schema::table('users', function (Blueprint $table) {
+      $table->foreign('address_id')
+        ->references('id')
+        ->on('addresses')
+        ->onDelete('no action');
+    });
   }
 
-  /**
+  /**'
    * Reverse the migrations.
    */
   public function down(): void {

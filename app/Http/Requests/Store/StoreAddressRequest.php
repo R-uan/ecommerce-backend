@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Requests\Store;
+namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 
-class StoreManufacturersRequest extends FormRequest {
+class StoreAddressRequest extends FormRequest {
   /**
    * Determine if the user is authorized to make this request.
    */
@@ -22,9 +22,11 @@ class StoreManufacturersRequest extends FormRequest {
    */
   public function rules(): array {
     return [
-      'name'    => ['required'],
-      'email'   => ['required', 'email'],
-      'website' => ['url'],
+      'planet'       => 'required',
+      'state'        => 'required',
+      'city'         => 'required',
+      'sector'       => 'required',
+      'residence_id' => 'required',
     ];
   }
 
@@ -35,5 +37,4 @@ class StoreManufacturersRequest extends FormRequest {
       ], JsonResponse::HTTP_UNPROCESSABLE_ENTITY)
     );
   }
-
 }

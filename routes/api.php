@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AddressController;
 use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\ManufacturersController;
 use App\Http\Controllers\OrdersController;
@@ -43,6 +44,12 @@ Route::prefix('/products')->group(function () {
     });
   });
 
+});
+
+Route::prefix('/address')->group(function () {
+  Route::controller(AddressController::class)->group(function () {
+    Route::post('/create', 'Create');
+  });
 });
 
 Route::prefix('/manufacturers')->group(function () {
