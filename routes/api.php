@@ -48,7 +48,11 @@ Route::prefix('/products')->group(function () {
 
 Route::prefix('/address')->group(function () {
   Route::controller(AddressController::class)->group(function () {
-    Route::post('/create', 'Create');
+    Route::middleware(ValidateUser::class)->group(function () {
+      Route::get('one', 'One');
+      Route::post('/create', 'Create');
+      Route::patch('update', 'Update');
+    });
   });
 });
 
