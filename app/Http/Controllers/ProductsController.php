@@ -131,9 +131,9 @@ class ProductsController extends Controller {
   public function Destroy(string $id) {
     try {
       $deleted = Products::destroy($id);
-      return response()->json($deleted,
-        $deleted == 0 ? Response::HTTP_NOT_FOUND : Response::HTTP_OK
-      );
+      return $deleted == 1 ?
+      response()->json(true, Response::HTTP_OK) :
+      response()->json(false, Response::HTTP_NOT_MODIFIED);
     } catch (\Throwable $th) {
       return response()->json([
         'message' => 'Something went wrong.',

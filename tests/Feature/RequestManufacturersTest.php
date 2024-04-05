@@ -9,7 +9,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
-class ManufacturersRequestsTest extends TestCase {
+class RequestManufacturersTest extends TestCase {
   use RefreshDatabase;
   protected $token;
   public function setUp(): void {
