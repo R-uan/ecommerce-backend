@@ -43,14 +43,14 @@ return new class extends Migration {
       $table->foreign('orders_id')
         ->references('id')
         ->on('orders')
-        ->onDelete('no action');
+        ->onDelete('cascade');
     });
 
     Schema::table('users', function (Blueprint $table) {
       $table->foreign('address_id')
         ->references('id')
         ->on('addresses')
-        ->onDelete('no action');
+        ->onDelete('set null');
     });
   }
 
