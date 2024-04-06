@@ -91,17 +91,18 @@ Route::prefix('/destinations')->group(function () {
   });
 });
 
-Route::middleware(ValidateUser::class)->group(function () {
-  Route::controller(OrdersController::class)->group(function () {
-    Route::post('/orders', 'Create');
-    Route::get('/orders', 'ClientOrders');
-    Route::get('/orders/{id}', 'One')->where('id', '[0-9]+');
-  });
-});
-
 Route::prefix('/orders')->group(function () {
   Route::controller(OrdersController::class)->group(function () {
-    Route::get('/orders', 'All');
-    Route::get('/search', 'Search');
+    Route::middleware(ValidateUser::class)->group(function () {
+      Route::post('/', 'Create');
+      Route::get('/', 'ClientOrders');
+      Route::get('/{id}', 'One')->where('id', '[0-9]+');
+    });
+
+    Route::middleware(ValidateAdmin::class)->group(function () {
+      Route::get('/all', 'All');
+      Route::get('/search', 'Search');
+      Route::delete('/{id}', 'Destroy')->where('id', '[0-9]+');
+    });
   });
 });

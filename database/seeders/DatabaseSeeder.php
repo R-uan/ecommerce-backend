@@ -16,7 +16,6 @@ class DatabaseSeeder extends Seeder {
    * Seed the application's database.
    */
   public function run(): void {
-    /* $this->call([ManufacturersSeeder::class, ProductSpecsSeeder::class]); */
     Manufacturers::factory()
       ->count(10)
       ->has(Products::factory()
