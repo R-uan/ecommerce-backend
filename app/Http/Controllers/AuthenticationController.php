@@ -8,6 +8,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
+/* Feature Tests Done */
 class AuthenticationController extends Controller {
   /**
    * Gets a JWT via given credentials.
@@ -35,18 +36,18 @@ class AuthenticationController extends Controller {
    * Refresh Token if >1 week old
    * @return \Illuminate\Http\JsonResponse
    */
-  public function refresh(Request $request) {
+  public function Refresh() {
     try {
       $token     = JWTAuth::getToken();
       $new_token = JWTAuth::refresh($token);
       return $new_token ?
       response()->json($new_token, Response::HTTP_OK) :
-      response()->json('Unable to refresh token.', Response::HTTP_NOT_EXTENDED);
+      response()->json('Unable to refresh token.', Response::HTTP_UNAUTHORIZED);
     } catch (Exception $e) {
       if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenInvalidException) {
         return response()->json('Invalid Token.', Response::HTTP_UNAUTHORIZED);
       } else if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenExpiredException) {
-        return response()->json('Cannot Refresh.', Response::HTTP_NOT_EXTENDED);
+        return response()->json('Cannot Refresh.', Response::HTTP_UNAUTHORIZED);
       } else {
         return response()->json('Token was not found.', Response::HTTP_UNAUTHORIZED);
       }

@@ -9,7 +9,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
-class RequestsProductsTest extends TestCase {
+class RequestProductsTest extends TestCase {
   use RefreshDatabase;
   protected $token;
 
@@ -24,6 +24,7 @@ class RequestsProductsTest extends TestCase {
   public function setUp(): void {
     parent::setUp();
     DB::statement('ALTER SEQUENCE products_id_seq RESTART WITH 1');
+    DB::statement('ALTER SEQUENCE manufacturers_id_seq RESTART WITH 1');
     $this->seed(DatabaseSeeder::class);
     $this->token = auth()->attempt(['email' => 'admin@admin.com', 'password' => 'admin']);
     $this->assertNotNull($this->token);

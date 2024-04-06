@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
 
+/* Feature Tests Done */
 class ManufacturersController extends Controller {
   /**
    * Gets all manufacturer records in the database

@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class RequestAddressesTest extends TestCase {
-
   use RefreshDatabase;
   protected $token;
   protected $test_address = [
