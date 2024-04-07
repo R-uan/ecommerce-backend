@@ -102,6 +102,7 @@ Route::prefix('/orders')->group(function () {
     Route::middleware(ValidateAdmin::class)->group(function () {
       Route::get('/all', 'All');
       Route::get('/search', 'Search');
+      Route::patch('/{id}', 'Update')->where('id', '[0-9]+');
       Route::delete('/{id}', 'Destroy')->where('id', '[0-9]+');
     });
   });

@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 
+/* Feature Tests Done */
 class OrdersController extends Controller {
   /**
    * Creates a new order record under the authenticated client
@@ -126,7 +127,9 @@ class OrdersController extends Controller {
    */
   public function All() {
     try {
-      $orders = Orders::all()->paginate();
+      $orders = Orders::select('orders.*')
+        ->orderBy('id')
+        ->paginate();
       return response()->json($orders, Response::HTTP_OK);
     } catch (\Throwable $th) {
       return response()->json($th->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -141,8 +144,8 @@ class OrdersController extends Controller {
     try {
       $delete = Orders::destroy($id);
       return $delete == 1 ?
-      response()->json(sprintf('Order was %s deleted', $id), Response::HTTP_OK) :
-      response()->json(sprintf('Order %s was not found.', $id), Response::HTTP_NOT_FOUND);
+      response()->json(true, Response::HTTP_OK) :
+      response()->json(false, Response::HTTP_NOT_FOUND);
     } catch (\Throwable $th) {
       return response()->json($th->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
     }
@@ -157,7 +160,7 @@ class OrdersController extends Controller {
       $order = Orders::find($id);
       if ($order) {
         $order->update($request->all());
-        return response()->json($order, Response::HTTP_OK);
+        return response()->json($order->fresh(), Response::HTTP_OK);
       } else {
         return response()->json(sprintf('Order %s not found.', $id), Response::HTTP_NOT_FOUND);
       }

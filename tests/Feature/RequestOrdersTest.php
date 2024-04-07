@@ -72,4 +72,23 @@ class RequestOrdersTest extends TestCase {
     $response->assertStatus(HttpResponse::HTTP_OK);
     $this->assertEquals(true, $response->json());
   }
+
+  public function test_update(): void {
+    $order   = $this->withHeader('Authorization', 'Bearer ' . $this->token)->post('/api/orders', $this->test_order);
+    $id      = $order->json()['id'];
+    $request = $this->withHeader('Authorization', 'Bearer ' . $this->token)->patch('/api/orders/' . $id, ['status' => 'Finished']);
+    $request->assertStatus(HttpResponse::HTTP_OK);
+    $this->assertEquals('Finished', $request->json()['status']);
+  }
+
+  public function test_search_query(): void {
+    $order       = $this->withHeader('Authorization', 'Bearer ' . $this->token)->post('/api/orders', $this->test_order);
+    $total_price = $order->json()['total'];
+    $greater     = $this->withHeader('Authorization', 'Bearer ' . $this->token)->get('/api/orders/search?total[gt]='.$total_price);
+    $greater->assertStatus(HttpResponse::HTTP_OK);
+    $this->assertEquals(0, $greater->json()['total']);
+    $equal     = $this->withHeader('Authorization', 'Bearer ' . $this->token)->get('/api/orders/search?total[eq]='.$total_price);
+    $equal->assertStatus(HttpResponse::HTTP_OK);
+    $this->assertEquals(1, $equal->json()['total']);
+  }
 }
