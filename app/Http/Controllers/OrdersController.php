@@ -85,7 +85,7 @@ class OrdersController extends Controller {
     try {
       $user  = auth()->user();
       $id    = $user->id;
-      $query = Orders::where('client_id', $id)->with('orderItens')->get();
+      $query = Orders::where('client_id', $id)->with(['OrderItens', 'PlanetDestination'])->get();
       return response()->json($query, Response::HTTP_OK);
     } catch (\Throwable $th) {
       return response()->json($th->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
