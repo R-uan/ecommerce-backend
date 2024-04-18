@@ -91,6 +91,24 @@ class RequestProductsTest extends TestCase {
   }
 
   /**
+   * GET request to /api/products/{id}
+   * - Asserts that the response status code is OK (200).
+   * - Generates a random number between 1-100 and uses it as the id.
+   * - Asserts that the id from the product received is the same it sent.
+   */
+  public function test_get_product_by_slug_request(): void {
+    $product = $this->get('/api/products/1');
+    $product->assertStatus(Response::HTTP_OK);
+    $product_json = $product->json();
+    $slug         = $product_json['slug'];
+
+    $request = $this->get('/api/products/' . $slug);
+    $request->assertStatus(Response::HTTP_OK);
+    $request_json = $request->json();
+    $this->assertEquals($product_json['id'], $request_json['id']);
+  }
+
+  /**
    * GET request to /api/products/search?
    * - Asserts that the response status code is OK (200).
    * - Asserts that the total itens returned is higher than 0

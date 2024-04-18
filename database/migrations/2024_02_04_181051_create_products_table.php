@@ -16,6 +16,7 @@ return new class extends Migration {
       $table->string('category');
       $table->float('unit_price');
       $table->boolean('availability');
+      $table->text('slug')->nullable();
       $table->integer('production_time');
       $table->string('image_url')->nullable();
       $table->text('long_description')->nullable();

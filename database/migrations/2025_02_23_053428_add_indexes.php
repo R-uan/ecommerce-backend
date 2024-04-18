@@ -11,6 +11,7 @@ return new class extends Migration {
   public function up(): void {
     Schema::table('products', function (Blueprint $table) {
       $table->index('name', 'products_name_idx');
+      $table->index('slug', 'products_slug_idx');
     });
   }
 

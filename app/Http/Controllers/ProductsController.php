@@ -7,6 +7,7 @@ use App\Http\Requests\Update\UpdateProductsRequest;
 use App\Models\ProductDetails;
 use App\Models\Products;
 use App\Services\Filters\ProductsQuery;
+use App\Services\URLService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
@@ -72,15 +73,16 @@ class ProductsController extends Controller {
       DB::beginTransaction();
       $product_input = [
         'name'              => $request->name,
-        'description'       => $request->description,
-        'image_url'         => $request->image_url,
         'category'          => $request->category,
+        'image_url'         => $request->image_url,
+        'unit_price'        => $request->unit_price,
+        'description'       => $request->description,
         'availability'      => $request->availability,
         'production_time'   => $request->production_time,
-        'unit_price'        => $request->unit_price,
         'manufacturers_id'  => $request->manufacturers_id,
-        'short_description' => $request->short_description,
         'long_description'  => $request->long_description,
+        'short_description' => $request->short_description,
+        'slug'              => URLService::CreateSlug($request->name),
       ];
 
       $product = new Products($product_input);
@@ -90,6 +92,7 @@ class ProductsController extends Controller {
         $product_details_input        = $request->product_details;
         $product_details              = new ProductDetails($product_details_input);
         $product_details->products_id = $product->id;
+
         $product_details->save();
         DB::commit();
         return response()->json([$product, $product_details], Response::HTTP_CREATED);
@@ -175,6 +178,7 @@ class ProductsController extends Controller {
         return Products::join('manufacturers', 'products.manufacturers_id', '=', 'manufacturers.id')
           ->select([
             'products.id',
+            'products.slug',
             'products.name',
             'products.category',
             'products.image_url',
@@ -214,6 +218,27 @@ class ProductsController extends Controller {
       }
     } catch (\Throwable $th) {
       return response()->json($th->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  public function OneBySlug(string $slug) {
+    try {
+      $product = Products::with('productDetails')
+        ->where('products.slug', $slug)
+        ->select('products.*')
+        ->join('manufacturers', 'products.manufacturers_id', '=', 'manufacturers.id')
+        ->select('products.*', 'manufacturers.name as manufacturer')
+        ->first();
+      if ($product) {
+        return response()->json($product, Response::HTTP_OK);
+      } else {
+        return response()->json('Product ' . $slug . ' was not found.', Response::HTTP_NOT_FOUND);
+      }
+    } catch (\Throwable $th) {
+      return response()->json([
+        'message' => 'Something went wrong.',
+        'error'   => $th->getMessage(),
+      ], Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
 }

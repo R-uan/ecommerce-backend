@@ -36,6 +36,7 @@ Route::prefix('/products')->group(function () {
     Route::get('/miniatures', 'AllMiniatures'); # Has tests
     Route::post('/miniatures', 'SomeMiniatures'); # Has tests
     Route::get('/{id}', 'One')->where('id', '[0-9]+'); # Has tests
+    Route::get('/{slug}', 'OneBySlug');
 
     Route::middleware(ValidateAdmin::class)->group(function () {
       Route::post('/', 'Create'); #Has tests

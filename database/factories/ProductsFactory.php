@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Manufacturers;
+use App\Services\URLService;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -15,9 +16,10 @@ class ProductsFactory extends Factory {
    * @return array<string, mixed>
    */
   public function definition(): array {
+    $name = $this->faker->name();
     return [
       'manufacturers_id'  => Manufacturers::factory(),
-      'name'              => $this->faker->name(),
+      'name'              => $name,
       'short_description' => $this->faker->text(100),
       'long_description'  => $this->faker->text(300),
       'image_url'         => $this->faker->url(),
@@ -25,6 +27,7 @@ class ProductsFactory extends Factory {
       'category'          => $this->faker->name(),
       'availability'      => $this->faker->boolean(),
       'unit_price'        => $this->faker->randomFloat(2),
+      'slug'              => URLService::CreateSlug($name),
     ];
   }
 }
