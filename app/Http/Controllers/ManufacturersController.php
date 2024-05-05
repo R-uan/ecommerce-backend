@@ -75,6 +75,7 @@ class ManufacturersController extends Controller {
         ->where($query)->select(
         'products.id',
         'products.name',
+        'products.slug',
         'products.category',
         'products.image_url',
         'products.unit_price',
